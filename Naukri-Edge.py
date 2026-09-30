@@ -17,6 +17,8 @@ Requirements:
 import os
 import time
 import logging
+import re
+from urllib.parse import urlencode
 import pandas as pd
 from dotenv import load_dotenv
 from selenium import webdriver
@@ -27,6 +29,8 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException, NoSuchElementException, WebDriverException
 from bs4 import BeautifulSoup
+from application_history import clean_expired_jobs, load_applied_jobs, normalize_job, record_applied_job
+from experience_answers import configured_experience_answer, radio_option_matches
 
 # Try to use webdriver-manager for automatic driver management
 try:
@@ -51,6 +55,14 @@ LASTNAME = os.getenv('LASTNAME', '')
 # --- Job Search ---
 KEYWORDS = [kw.strip() for kw in os.getenv('KEYWORDS', '').split(',') if kw.strip()]
 LOCATION = os.getenv('LOCATION', '').strip()
+EXCLUDED_COMPANIES = [
+    company.strip().casefold()
+    for company in os.getenv('EXCLUDED_COMPANIES', '').split(',')
+    if company.strip()
+]
+CANDIDATE_EXPERIENCE_YEARS = float(os.getenv('CANDIDATE_EXPERIENCE_YEARS', '5.4'))
+MIN_CANDIDATE_EXPERIENCE_YEARS = float(os.getenv('MIN_CANDIDATE_EXPERIENCE_YEARS', '4'))
+MAX_CANDIDATE_EXPERIENCE_YEARS = float(os.getenv('MAX_CANDIDATE_EXPERIENCE_YEARS', '6'))
 
 # --- Limits ---
 MAX_APPLICATIONS = int(os.getenv('MAX_APPLICATIONS', '50'))
@@ -83,12 +95,47 @@ def validate_config():
         errors.append("FIRSTNAME is not set in .env")
     if not LASTNAME:
         errors.append("LASTNAME is not set in .env")
+    if MIN_CANDIDATE_EXPERIENCE_YEARS >= MAX_CANDIDATE_EXPERIENCE_YEARS:
+        errors.append("MIN_CANDIDATE_EXPERIENCE_YEARS must be less than MAX_CANDIDATE_EXPERIENCE_YEARS")
+    if not MIN_CANDIDATE_EXPERIENCE_YEARS < CANDIDATE_EXPERIENCE_YEARS < MAX_CANDIDATE_EXPERIENCE_YEARS:
+        errors.append("CANDIDATE_EXPERIENCE_YEARS must be strictly between the configured bounds")
     if errors:
         for e in errors:
             logger.error(e)
         logger.error("Please copy .env.example to .env and fill in your details.")
         return False
     return True
+
+
+def parse_experience_range(text):
+    """Extract an explicit experience range such as '4-6 Yrs' or '4 to 6 years'."""
+    match = re.search(
+        r'(?<!\d)(\d+(?:\.\d+)?)\s*(?:-\s*to\s*-?|to|-)' 
+        r'\s*(\d+(?:\.\d+)?)\s*-?\s*(?:years?|yrs?)\b',
+        text or '',
+        re.IGNORECASE,
+    )
+    if not match:
+        return None
+    return float(match.group(1)), float(match.group(2))
+
+
+def company_is_excluded(company):
+    """Match configured company exclusions, including names such as 'Infosys Limited'."""
+    normalized_company = ' '.join(company.casefold().split())
+    return any(excluded in normalized_company for excluded in EXCLUDED_COMPANIES)
+
+
+def experience_matches(job):
+    """Accept a posting only when its explicit experience range includes the candidate."""
+    minimum = job.get('experience_min')
+    maximum = job.get('experience_max')
+    return (
+        minimum is not None
+        and maximum is not None
+        and MIN_CANDIDATE_EXPERIENCE_YEARS < CANDIDATE_EXPERIENCE_YEARS < MAX_CANDIDATE_EXPERIENCE_YEARS
+        and minimum <= CANDIDATE_EXPERIENCE_YEARS <= maximum
+    )
 
 
 def create_edge_driver():
@@ -147,16 +194,12 @@ def build_search_urls():
         keyword_slug = keyword.lower().replace(' ', '-')
         for page_num in range(1, PAGES_PER_KEYWORD + 1):
             if not LOCATION:
-                if page_num == 1:
-                    url = f"https://www.naukri.com/{keyword_slug}-jobs"
-                else:
-                    url = f"https://www.naukri.com/{keyword_slug}-jobs-{page_num}"
+                search_path = f"{keyword_slug}-jobs"
             else:
                 location_slug = LOCATION.lower().replace(' ', '-')
-                if page_num == 1:
-                    url = f"https://www.naukri.com/{keyword_slug}-jobs-in-{location_slug}"
-                else:
-                    url = f"https://www.naukri.com/{keyword_slug}-jobs-in-{location_slug}-{page_num}"
+                search_path = f"{keyword_slug}-jobs-in-{location_slug}"
+            query = urlencode({"k": keyword, "pageNo": page_num})
+            url = f"https://www.naukri.com/{search_path}?{query}"
             urls.append((keyword, url))
     return urls
 
@@ -228,7 +271,19 @@ def collect_job_links_from_tab(driver, window_handle):
                 # Ensure full URL
                 if href.startswith('/'):
                     href = 'https://www.naukri.com' + href
-                links.append(href)
+                role = title_link.get_text(" ", strip=True)
+                company_link = job_wrapper.find("a", class_="comp-name")
+                company = company_link.get_text(" ", strip=True) if company_link else ""
+                experience_range = parse_experience_range(job_wrapper.get_text(" ", strip=True))
+                if experience_range is None:
+                    experience_range = parse_experience_range(href)
+                links.append({
+                    "url": href,
+                    "role": role,
+                    "company": company,
+                    "experience_min": experience_range[0] if experience_range else None,
+                    "experience_max": experience_range[1] if experience_range else None,
+                })
 
     except WebDriverException as e:
         logger.warning(f"[Tab] Error reading tab: {e}")
@@ -253,8 +308,21 @@ def collect_all_jobs_parallel(driver, search_urls):
     window_handles = driver.window_handles
     logger.info(f"Collecting job links from {len(window_handles)} tabs...")
 
-    for handle in window_handles:
+    seen_urls = set()
+    for page_number, handle in enumerate(window_handles, 1):
         tab_links = collect_job_links_from_tab(driver, handle)
+        page_url = driver.current_url
+        new_page_links = [job for job in tab_links if job["url"] not in seen_urls]
+        logger.info(
+            f"[Page {page_number}] Collected {len(new_page_links)} new job links "
+            f"from {page_url}"
+        )
+        if tab_links and not new_page_links:
+            logger.warning(
+                f"[Page {page_number}] Returned no new job links; Naukri may have ignored "
+                "the requested page number."
+            )
+        seen_urls.update(job["url"] for job in tab_links)
         all_links.extend(tab_links)
 
     # Close all extra tabs and return to main
@@ -271,10 +339,10 @@ def collect_all_jobs_parallel(driver, search_urls):
     # Remove duplicates while preserving order
     seen = set()
     unique_links = []
-    for link in all_links:
-        if link not in seen:
-            seen.add(link)
-            unique_links.append(link)
+    for job in all_links:
+        if job["url"] not in seen:
+            seen.add(job["url"])
+            unique_links.append(job)
 
     logger.info(f"Total unique job links collected: {len(unique_links)}")
     return unique_links
@@ -313,6 +381,87 @@ def click_apply_button(driver, link):
     return False
 
 
+def answer_configured_experience_questions(driver):
+    """Answer recognized yes/years questions in the Naukri chatbot drawer."""
+    try:
+        WebDriverWait(driver, 3).until(
+            EC.presence_of_element_located(
+                (By.CSS_SELECTOR, ".chatbot_ListItem.botItem .msg, .chatbot_ListItem .botMsg .msg")
+            )
+        )
+    except TimeoutException:
+        return
+
+    answered_questions = set()
+    for _ in range(5):
+        try:
+            question_elements = driver.find_elements(
+                By.CSS_SELECTOR,
+                ".chatbot_ListItem.botItem .msg, .chatbot_ListItem .botMsg .msg",
+            )
+            question = question_elements[-1].text.strip() if question_elements else ""
+            if question in answered_questions:
+                time.sleep(1)
+                continue
+            answer = configured_experience_answer(question)
+            if not answer:
+                return
+
+            radio_containers = driver.find_elements(
+                By.CSS_SELECTOR, ".singleselect-radiobutton-container"
+            )
+            visible_radio = next((item for item in radio_containers if item.is_displayed()), None)
+            text_area = None
+            if visible_radio:
+                radios = visible_radio.find_elements(By.CSS_SELECTOR, ".ssrc__radio")
+                labels = visible_radio.find_elements(By.CSS_SELECTOR, ".ssrc__label")
+                matched = False
+                for radio, label in zip(radios, labels):
+                    if radio_option_matches(answer, radio.get_attribute("value"), label.text):
+                        driver.execute_script("arguments[0].click();", label)
+                        matched = True
+                        break
+                if not matched:
+                    logger.warning("No radio option matched configured experience answer: %s", answer)
+                    return
+            else:
+                text_areas = driver.find_elements(
+                    By.CSS_SELECTOR,
+                    ".chatbot_SendMessageContainer .textArea[contenteditable='true'], "
+                    ".chatbot_InputContainer .textArea[contenteditable='true'], "
+                    "div.textArea[contenteditable='true']",
+                )
+                text_area = next(
+                    (item for item in text_areas if item.is_displayed() and item.is_enabled()), None
+                )
+                if not text_area:
+                    return
+                driver.execute_script(
+                    "arguments[0].focus(); arguments[0].innerText = arguments[1]; "
+                    "arguments[0].dispatchEvent(new Event('input', {bubbles: true})); "
+                    "arguments[0].dispatchEvent(new Event('change', {bubbles: true}));",
+                    text_area,
+                    answer,
+                )
+
+            logger.info("Auto-answering experience question with: %s", answer)
+            save_buttons = driver.find_elements(
+                By.CSS_SELECTOR, ".sendMsg, [class*='sendMsg'], div.sendMsg"
+            )
+            save_button = next((item for item in save_buttons if item.is_displayed()), None)
+            if save_button:
+                driver.execute_script("arguments[0].click();", save_button)
+            elif text_area:
+                text_area.send_keys(Keys.RETURN)
+            else:
+                return
+            answered_questions.add(question)
+            time.sleep(2)
+        except (NoSuchElementException, TimeoutException, WebDriverException) as error:
+            logger.debug("Experience question handler stopped: %s", error)
+            return
+
+
 def apply_to_jobs(driver, job_links):
     """
     Visit each job link and attempt to apply.
@@ -320,18 +469,53 @@ def apply_to_jobs(driver, job_links):
     """
     applied = 0
     failed = 0
-    applied_list = {'passed': [], 'failed': []}
+    skipped = 0
+    applied_list = {'passed': [], 'failed': [], 'skipped': []}
+    applied_jobs = load_applied_jobs()
 
     logger.info("=" * 50)
     logger.info(f"Starting job applications (max: {MAX_APPLICATIONS})...")
     logger.info("=" * 50)
 
-    for i, link in enumerate(job_links, 1):
+    for i, job in enumerate(job_links, 1):
+        link = job["url"]
         if applied >= MAX_APPLICATIONS:
             logger.info(f"Reached max application limit ({MAX_APPLICATIONS}). Stopping.")
             break
 
-        logger.info(f"[{i}/{len(job_links)}] Visiting job: {link}")
+        role = job["role"].strip()
+        company = job["company"].strip()
+        if not company or not role:
+            logger.warning(f"[{i}/{len(job_links)}] Skipping job with missing company or role: {link}")
+            skipped += 1
+            applied_list['skipped'].append(link)
+            continue
+
+        if company_is_excluded(company):
+            logger.info(f"[{i}/{len(job_links)}] Skipping excluded company: {company} | {role}")
+            skipped += 1
+            applied_list['skipped'].append(link)
+            continue
+
+        if not experience_matches(job):
+            experience = (
+                f"{job['experience_min']}-{job['experience_max']} years"
+                if job.get('experience_min') is not None and job.get('experience_max') is not None
+                else "not specified"
+            )
+            logger.info(f"[{i}/{len(job_links)}] Skipping experience mismatch ({experience}): {company} | {role}")
+            skipped += 1
+            applied_list['skipped'].append(link)
+            continue
+
+        job_key = normalize_job(company, role)
+        if job_key in applied_jobs:
+            logger.info(f"[{i}/{len(job_links)}] Skipping previously applied job: {company} | {role}")
+            skipped += 1
+            applied_list['skipped'].append(link)
+            continue
+
+        logger.info(f"[{i}/{len(job_links)}] Visiting {company} | {role}: {link}")
         try:
             driver.get(link)
         except WebDriverException as e:
@@ -344,8 +528,11 @@ def apply_to_jobs(driver, job_links):
         if click_apply_button(driver, link):
             applied += 1
             applied_list['passed'].append(link)
+            record_applied_job(company, role, link)
+            applied_jobs.add(job_key)
             logger.info(f"  ✓ Applied! Total: {applied}")
             time.sleep(2)
+            answer_configured_experience_questions(driver)
         else:
             failed += 1
             applied_list['failed'].append(link)
@@ -394,7 +581,7 @@ def apply_to_jobs(driver, job_links):
         except NoSuchElementException:
             pass
 
-    return applied, failed, applied_list
+    return applied, failed, skipped, applied_list
 
 
 def save_results(applied_list):
@@ -414,13 +601,23 @@ def main():
 
     if not validate_config():
         return
+    clean_expired_jobs()
 
     logger.info(f"Keywords: {KEYWORDS}")
     logger.info(f"Location: {LOCATION or 'Anywhere'}")
     logger.info(f"Max applications: {MAX_APPLICATIONS}")
     logger.info(f"Pages per keyword: {PAGES_PER_KEYWORD}")
+    logger.info(f"Excluded companies: {', '.join(EXCLUDED_COMPANIES) or 'None'}")
+    logger.info(
+        f"Experience filter: candidate {CANDIDATE_EXPERIENCE_YEARS:g} years must be strictly "
+        f"between {MIN_CANDIDATE_EXPERIENCE_YEARS:g} and {MAX_CANDIDATE_EXPERIENCE_YEARS:g}; "
+        "posting range must include candidate experience"
+    )
 
     driver = None
+    applied = failed = skipped = 0
+    applied_list = {'passed': [], 'failed': [], 'skipped': []}
+    results_saved = False
     try:
         # Initialize browser
         driver = create_edge_driver()
@@ -437,28 +634,33 @@ def main():
 
         if not job_links:
             logger.warning("No job links found. Check your keywords and location.")
-            return
-
-        # Apply to jobs
-        applied, failed, applied_list = apply_to_jobs(driver, job_links)
+        else:
+            # Apply to jobs
+            applied, failed, skipped, applied_list = apply_to_jobs(driver, job_links)
 
         # Save results
         save_results(applied_list)
-
-        # Summary
-        logger.info("=" * 50)
-        logger.info("APPLICATION SUMMARY")
-        logger.info(f"  Successfully applied: {applied}")
-        logger.info(f"  Failed/Skipped:      {failed}")
-        logger.info(f"  Total processed:     {applied + failed}")
-        logger.info(f"  Results saved to:    naukriapplied.csv")
-        logger.info("=" * 50)
+        results_saved = True
 
     except Exception as e:
         logger.exception(f"An unexpected error occurred: {e}")
     finally:
         if driver:
             try:
+                logger.info("=" * 50)
+                logger.info("APPLICATION SUMMARY")
+                logger.info(f"  Successfully applied: {applied}")
+                logger.info(f"  Failed/Skipped:      {failed + skipped}")
+                logger.info(f"  Total processed:     {applied + failed + skipped}")
+                if results_saved:
+                    logger.info("  Results saved to:    naukriapplied.csv")
+                else:
+                    logger.info("  Results saved to:    no results file written")
+                logger.info("=" * 50)
+                try:
+                    input("Review the summary above. Press Enter to close the browser...")
+                except EOFError:
+                    logger.warning("No interactive console available; closing the browser.")
                 driver.quit()
                 logger.info("Browser closed.")
             except Exception:

@@ -11,6 +11,7 @@
 - ✅ Handles custom first/last name fields and "Submit and Apply" flow
 - ✅ Detects daily application quota limits
 - ✅ Saves results (passed/failed) to a CSV file
+- ✅ Avoids repeat applications to the same company and role using `applied_jobs.csv`
 - ✅ Uses **Microsoft Edge** browser
 - ✅ Uses `webdriver-manager` for automatic driver download (no manual setup!)
 
@@ -107,6 +108,8 @@ After running, results are saved to **`naukriapplied.csv`** with two columns:
 - `passed` — URLs of jobs successfully applied to
 - `failed` — URLs where the apply attempt failed
 
+Successfully applied company/role pairs are also saved to **`applied_jobs.csv`** and checked on later runs. Matching ignores capitalization and extra whitespace.
+
 ## 🔧 2026 Naukri.com Update
 
 The bot has been updated to work with Naukri.com's 2026 redesign. Key changes:
@@ -127,6 +130,8 @@ Naukri-autoapply-bot/
 ├── .gitignore            # Files to exclude from git
 ├── requirements.txt      # Python dependencies
 ├── README.md             # This file
+├── application_history.py # Company/role duplicate-application history
+├── applied_jobs.csv      # Persistent company/role application ledger
 ├── Naukri-Edge.py        # Main bot script for Microsoft Edge browser
 ├── Naukri autoapply jobs.ipynb  # Jupyter Notebook version (legacy)
 └── naukriapplied.csv     # Output: applied/failed job links (auto-generated)

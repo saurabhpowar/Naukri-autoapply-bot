@@ -26,6 +26,8 @@ import difflib
 import logging
 import re
 from datetime import datetime
+from application_history import clean_expired_jobs, load_applied_jobs, normalize_job, record_applied_job
+from experience_answers import configured_experience_answer, radio_option_matches
 from dotenv import load_dotenv
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -224,9 +226,10 @@ def select_jobs_and_apply(driver):
         logger.warning("No recommended jobs available.")
         return False
 
-    selected = 0
+    selected_jobs = []
+    applied_jobs = load_applied_jobs()
     for card in job_cards:
-        if selected >= MAX_SELECT:
+        if len(selected_jobs) >= MAX_SELECT:
             break
         try:
             if not card.find_elements(By.CSS_SELECTOR, ".tuple-check-box i"):
@@ -237,23 +240,38 @@ def select_jobs_and_apply(driver):
             if checked_icon:
                 continue
 
-            driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", card)
-            time.sleep(0.5)
-
-            cb = card.find_element(By.CSS_SELECTOR, ".tuple-check-box i.naukicon, .tuple-check-box")
-            driver.execute_script("arguments[0].click();", cb)
-            selected += 1
-
             try:
                 title = card.find_element(By.CSS_SELECTOR, ".title.typ-16Bold").text
             except NoSuchElementException:
-                title = "Unknown"
-            logger.info(f"  [{selected}/{MAX_SELECT}] ✓ {title}")
+                try:
+                    title = card.find_element(By.CSS_SELECTOR, ".title").text
+                except NoSuchElementException:
+                    title = ""
+            try:
+                company = card.find_element(By.CSS_SELECTOR, ".comp-name").text
+            except NoSuchElementException:
+                company = ""
+
+            if not company.strip() or not title.strip():
+                logger.warning("  Skipping job with missing company or role.")
+                continue
+            job_key = normalize_job(company, title)
+            if job_key in applied_jobs:
+                logger.info(f"  Skipping previously applied job: {company} | {title}")
+                continue
+
+            driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", card)
+            time.sleep(0.5)
+            cb = card.find_element(By.CSS_SELECTOR, ".tuple-check-box i.naukicon, .tuple-check-box")
+            driver.execute_script("arguments[0].click();", cb)
+            selected_jobs.append({"company": company.strip(), "role": title.strip()})
+            applied_jobs.add(job_key)
+            logger.info(f"  [{len(selected_jobs)}/{MAX_SELECT}] ✓ {company} | {title}")
             time.sleep(1)
         except Exception as e:
             logger.warning(f"  Select error: {e}")
 
-    if selected == 0:
+    if not selected_jobs:
         logger.warning("No jobs were selected.")
         return False
 
@@ -267,9 +285,11 @@ def select_jobs_and_apply(driver):
             return False
 
         driver.execute_script("arguments[0].click();", apply_btn)
-        logger.info(f"✓ Clicked Apply for {selected} jobs!")
+        logger.info(f"✓ Clicked Apply for {len(selected_jobs)} jobs!")
+        for job in selected_jobs:
+            record_applied_job(job["company"], job["role"])
         time.sleep(3)
-        return True
+        return selected_jobs
 
     except (TimeoutException, ElementClickInterceptedException) as e:
         logger.error(f"Could not click Apply: {e}")
@@ -450,13 +470,18 @@ def handle_radio_buttons(driver, known_answers):
     logger.debug(f"   Options: {options}")
 
     # KNOWN ANSWER → auto-fill (use fresh references)
-    known = fuzzy_lookup(question_text, known_answers)
+    configured_answer = configured_experience_answer(question_text)
+    known = configured_answer or fuzzy_lookup(question_text, known_answers)
     if known:
         radios = container.find_elements(By.CSS_SELECTOR, ".ssrc__radio")
         lbls = container.find_elements(By.CSS_SELECTOR, ".ssrc__label")
-        for rb in radios:
+        for rb, lbl in zip(radios, lbls):
             try:
-                if rb.get_attribute('value') == known or rb.get_attribute('id') == known:
+                if (
+                    rb.get_attribute('value') == known
+                    or rb.get_attribute('id') == known
+                    or radio_option_matches(known, rb.get_attribute('value'), lbl.text)
+                ):
                     driver.execute_script("arguments[0].click();", rb)
                     logger.info(f"   ✓ Auto-filled: '{known}'")
                     time.sleep(1)
@@ -464,9 +489,9 @@ def handle_radio_buttons(driver, known_answers):
                     return True
             except Exception:
                 continue
-        for lbl in lbls:
+        for rb, lbl in zip(radios, lbls):
             try:
-                if lbl.text.strip().lower() == known.lower():
+                if radio_option_matches(known, rb.get_attribute('value'), lbl.text):
                     driver.execute_script("arguments[0].click();", lbl)
                     logger.info(f"   ✓ Auto-filled: '{known}'")
                     time.sleep(1)
@@ -551,7 +576,8 @@ def handle_contenteditable(driver, known_answers):
     logger.info(f"📝 Text question: '{question_text}'")
 
     # KNOWN ANSWER → auto-fill
-    known = fuzzy_lookup(question_text, known_answers)
+    configured_answer = configured_experience_answer(question_text)
+    known = configured_answer or fuzzy_lookup(question_text, known_answers)
     if known:
         try:
             fresh_text_area = find_chat_text_area(driver)
@@ -736,6 +762,7 @@ def main():
     if not NAUKRI_EMAIL or not NAUKRI_PASSWORD:
         logger.error("Set NAUKRI_EMAIL and NAUKRI_PASSWORD in .env")
         return
+    clean_expired_jobs()
 
     selected_tabs = select_tabs()
     logger.info(f"Applying to tabs: {', '.join(t['label'] for t in selected_tabs)}")
@@ -756,12 +783,13 @@ def main():
             while True:
                 navigate_to_tab(driver, tab['id'])
 
-                if not select_jobs_and_apply(driver):
+                selected_jobs = select_jobs_and_apply(driver)
+                if not selected_jobs:
                     logger.info(f"No more jobs in '{tab['label']}'.")
                     break
 
-                handle_chatbot_drawer(driver, known_answers)
-                total_applied += MAX_SELECT
+                if handle_chatbot_drawer(driver, known_answers):
+                    total_applied += len(selected_jobs)
                 known_answers = load_answers()
 
                 logger.info(f"Total applied so far: ~{total_applied}")
