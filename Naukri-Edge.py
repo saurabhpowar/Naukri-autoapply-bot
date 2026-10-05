@@ -18,7 +18,7 @@ import os
 import time
 import logging
 import re
-from urllib.parse import urlencode
+from urllib.parse import urlencode, urlparse
 import pandas as pd
 from dotenv import load_dotenv
 from selenium import webdriver
@@ -66,7 +66,6 @@ MAX_CANDIDATE_EXPERIENCE_YEARS = float(os.getenv('MAX_CANDIDATE_EXPERIENCE_YEARS
 
 # --- Limits ---
 MAX_APPLICATIONS = int(os.getenv('MAX_APPLICATIONS', '50'))
-PAGES_PER_KEYWORD = int(os.getenv('PAGES_PER_KEYWORD', '2'))
 
 # --- Edge Driver Path (optional, only if NOT using webdriver-manager) ---
 EDGE_DRIVER_PATH = os.getenv('EDGE_DRIVER_PATH', '')
@@ -183,54 +182,24 @@ def login_naukri(driver):
     logger.info("Login completed.")
 
 
+def build_search_url(keyword, page_num):
+    """Build a Naukri search URL for a keyword and page number."""
+    keyword_slug = keyword.lower().replace(' ', '-')
+    if not LOCATION:
+        search_path = f"{keyword_slug}-jobs"
+    else:
+        location_slug = LOCATION.lower().replace(' ', '-')
+        search_path = f"{keyword_slug}-jobs-in-{location_slug}"
+    query = urlencode({"k": keyword, "pageNo": page_num})
+    return f"https://www.naukri.com/{search_path}?{query}"
+
+
 def build_search_urls():
     """
-    Build all search URLs for every keyword and page combination.
-    Naukri.com updated URL format: /{keyword}-jobs-in-{location}
-    Returns a list of (keyword, url) tuples.
+    Build the first search URL for every keyword.
+    Later pages are loaded until a page contains no new job links.
     """
-    urls = []
-    for keyword in KEYWORDS:
-        keyword_slug = keyword.lower().replace(' ', '-')
-        for page_num in range(1, PAGES_PER_KEYWORD + 1):
-            if not LOCATION:
-                search_path = f"{keyword_slug}-jobs"
-            else:
-                location_slug = LOCATION.lower().replace(' ', '-')
-                search_path = f"{keyword_slug}-jobs-in-{location_slug}"
-            query = urlencode({"k": keyword, "pageNo": page_num})
-            url = f"https://www.naukri.com/{search_path}?{query}"
-            urls.append((keyword, url))
-    return urls
-
-
-def open_tabs_parallel(driver, search_urls):
-    """
-    Open all search URLs in parallel browser tabs.
-    The first URL opens in the current tab; the rest open in new tabs.
-    Returns the original window handle.
-    """
-    original_window = driver.current_window_handle
-
-    if not search_urls:
-        return original_window
-
-    # Open first URL in current tab
-    keyword, first_url = search_urls[0]
-    logger.info(f"[Tab: Main] Opening: {first_url}")
-    driver.get(first_url)
-    time.sleep(3)
-
-    # Open remaining URLs in new tabs
-    for keyword, url in search_urls[1:]:
-        logger.info(f"[Tab: New] Opening: {url}")
-        driver.switch_to.new_window('tab')
-        driver.get(url)
-        time.sleep(2)
-
-    # Switch back to the original tab
-    driver.switch_to.window(original_window)
-    return original_window
+    return [(keyword, build_search_url(keyword, 1)) for keyword in KEYWORDS]
 
 
 def collect_job_links_from_tab(driver, window_handle):
@@ -291,61 +260,44 @@ def collect_job_links_from_tab(driver, window_handle):
     return links
 
 
-def collect_all_jobs_parallel(driver, search_urls):
+def iter_search_pages(driver, search_urls):
     """
-    Open all keyword search pages in parallel tabs and collect job links from each.
-    Returns a deduplicated list of job URLs.
+    Yield one page of new job links at a time, stopping when results repeat.
     """
     logger.info("=" * 50)
-    logger.info(f"Opening {len(search_urls)} search pages in parallel tabs...")
+    logger.info(f"Paginating {len(search_urls)} keyword searches page by page...")
     logger.info("=" * 50)
 
-    # Open all search URLs in parallel tabs
-    original_window = open_tabs_parallel(driver, search_urls)
-
-    # Collect job links from each tab
-    all_links = []
-    window_handles = driver.window_handles
-    logger.info(f"Collecting job links from {len(window_handles)} tabs...")
-
-    seen_urls = set()
-    for page_number, handle in enumerate(window_handles, 1):
-        tab_links = collect_job_links_from_tab(driver, handle)
-        page_url = driver.current_url
-        new_page_links = [job for job in tab_links if job["url"] not in seen_urls]
-        logger.info(
-            f"[Page {page_number}] Collected {len(new_page_links)} new job links "
-            f"from {page_url}"
-        )
-        if tab_links and not new_page_links:
-            logger.warning(
-                f"[Page {page_number}] Returned no new job links; Naukri may have ignored "
-                "the requested page number."
-            )
-        seen_urls.update(job["url"] for job in tab_links)
-        all_links.extend(tab_links)
-
-    # Close all extra tabs and return to main
-    logger.info("Closing search tabs...")
-    for handle in window_handles:
-        if handle != original_window:
+    original_window = driver.current_window_handle
+    for keyword, first_url in search_urls:
+        page_num = 1
+        keyword_seen_urls = set()
+        while True:
+            url = first_url if page_num == 1 else build_search_url(keyword, page_num)
+            logger.info(f"[{keyword} page {page_num}] Loading results: {url}")
             try:
-                driver.switch_to.window(handle)
-                driver.close()
-            except WebDriverException:
-                pass
-    driver.switch_to.window(original_window)
+                driver.get(url)
+            except WebDriverException as error:
+                logger.warning(f"[{keyword} page {page_num}] Failed to load search page: {error}")
+                break
 
-    # Remove duplicates while preserving order
-    seen = set()
-    unique_links = []
-    for job in all_links:
-        if job["url"] not in seen:
-            seen.add(job["url"])
-            unique_links.append(job)
+            tab_links = collect_job_links_from_tab(driver, original_window)
+            new_page_links = []
+            for job in tab_links:
+                if job["url"] not in keyword_seen_urls:
+                    keyword_seen_urls.add(job["url"])
+                    new_page_links.append(job)
 
-    logger.info(f"Total unique job links collected: {len(unique_links)}")
-    return unique_links
+            logger.info(
+                f"[{keyword} page {page_num}] Collected {len(new_page_links)} new job links "
+                f"from {driver.current_url}"
+            )
+            if not new_page_links:
+                logger.info(f"[{keyword}] No new jobs on page {page_num}; stopping pagination.")
+                break
+
+            yield keyword, page_num, new_page_links
+            page_num += 1
 
 
 def click_apply_button(driver, link):
@@ -379,6 +331,11 @@ def click_apply_button(driver, link):
             continue
 
     return False
+
+
+def is_naukri_url(url):
+    hostname = urlparse(url).hostname or ""
+    return hostname.casefold().endswith("naukri.com")
 
 
 def answer_configured_experience_questions(driver):
@@ -462,14 +419,15 @@ def answer_configured_experience_questions(driver):
             return
 
 
-def apply_to_jobs(driver, job_links):
+def apply_to_jobs(driver, job_links, search_window, already_applied=0):
     """
     Visit each job link and attempt to apply.
-    Returns (applied_count, failed_count, applied_list).
+    Returns applied, failed, and skipped counts, results, and quota status.
     """
     applied = 0
     failed = 0
     skipped = 0
+    quota_expired = False
     applied_list = {'passed': [], 'failed': [], 'skipped': []}
     applied_jobs = load_applied_jobs()
 
@@ -479,7 +437,7 @@ def apply_to_jobs(driver, job_links):
 
     for i, job in enumerate(job_links, 1):
         link = job["url"]
-        if applied >= MAX_APPLICATIONS:
+        if already_applied + applied >= MAX_APPLICATIONS:
             logger.info(f"Reached max application limit ({MAX_APPLICATIONS}). Stopping.")
             break
 
@@ -515,73 +473,125 @@ def apply_to_jobs(driver, job_links):
             applied_list['skipped'].append(link)
             continue
 
-        logger.info(f"[{i}/{len(job_links)}] Visiting {company} | {role}: {link}")
+        logger.info(f"[{i}/{len(job_links)}] Opening job in a new tab: {company} | {role}: {link}")
+        job_window = None
+        internal_windows = []
+        external_windows = set()
         try:
+            driver.switch_to.new_window('tab')
+            job_window = driver.current_window_handle
             driver.get(link)
         except WebDriverException as e:
             logger.warning(f"  ✗ Failed to load page: {e}")
             failed += 1
             applied_list['failed'].append(link)
+            try:
+                if job_window and job_window in driver.window_handles:
+                    driver.switch_to.window(job_window)
+                    driver.close()
+            except WebDriverException:
+                pass
+            driver.switch_to.window(search_window)
             continue
 
-        # --- Click the "Apply" button ---
-        if click_apply_button(driver, link):
+        try:
+            handles_before_apply = set(driver.window_handles)
+            if not click_apply_button(driver, link):
+                failed += 1
+                applied_list['failed'].append(link)
+                logger.warning(f"  ✗ No Apply button found. Fail count: {failed}")
+                continue
+
+            time.sleep(2)
+            new_windows = set(driver.window_handles) - handles_before_apply
+            for handle in new_windows:
+                try:
+                    driver.switch_to.window(handle)
+                    time.sleep(1)
+                    if is_naukri_url(driver.current_url):
+                        internal_windows.append(handle)
+                    else:
+                        external_windows.add(handle)
+                        logger.info("  External application opened in a separate tab.")
+                except WebDriverException:
+                    continue
+
+            if job_window in driver.window_handles:
+                driver.switch_to.window(job_window)
+                if is_naukri_url(driver.current_url):
+                    internal_windows.insert(0, job_window)
+                else:
+                    external_windows.add(job_window)
+                    logger.info("  External application opened in the job tab.")
+
+            application_window = internal_windows[-1] if internal_windows else None
+            if application_window:
+                driver.switch_to.window(application_window)
+                answer_configured_experience_questions(driver)
+
+                try:
+                    quota_el = driver.find_element(
+                        By.XPATH, "//*[text()='Your daily quota has been expired.']"
+                    )
+                    if quota_el:
+                        logger.info("Daily quota expired. Stopping.")
+                        quota_expired = True
+                except NoSuchElementException:
+                    pass
+
+                if not quota_expired:
+                    try:
+                        driver.find_element(By.XPATH, "//input[@id='CUSTOM-FIRSTNAME']")
+                        firstname_el = driver.find_element(By.ID, 'CUSTOM-FIRSTNAME')
+                        firstname_el.clear()
+                        firstname_el.send_keys(FIRSTNAME)
+                        logger.info("  Filled custom first name field")
+                    except NoSuchElementException:
+                        pass
+
+                    try:
+                        driver.find_element(By.XPATH, "//input[@id='CUSTOM-LASTNAME']")
+                        lastname_el = driver.find_element(By.ID, 'CUSTOM-LASTNAME')
+                        lastname_el.clear()
+                        lastname_el.send_keys(LASTNAME)
+                        logger.info("  Filled custom last name field")
+                    except NoSuchElementException:
+                        pass
+
+                    try:
+                        submit_btn = driver.find_element(By.XPATH, "//*[text()='Submit and Apply']")
+                        submit_btn.click()
+                        logger.info("  Clicked 'Submit and Apply'")
+                        time.sleep(2)
+                    except NoSuchElementException:
+                        pass
+
             applied += 1
             applied_list['passed'].append(link)
             record_applied_job(company, role, link)
             applied_jobs.add(job_key)
-            logger.info(f"  ✓ Applied! Total: {applied}")
-            time.sleep(2)
-            answer_configured_experience_questions(driver)
-        else:
-            failed += 1
-            applied_list['failed'].append(link)
-            logger.warning(f"  ✗ No Apply button found. Fail count: {failed}")
-            continue
+            logger.info(f"  ✓ Apply flow completed. Total: {already_applied + applied}")
+        finally:
+            for handle in internal_windows:
+                try:
+                    if handle != search_window and handle in driver.window_handles:
+                        driver.switch_to.window(handle)
+                        driver.close()
+                except WebDriverException:
+                    pass
+            try:
+                if (job_window and job_window not in external_windows
+                        and job_window != search_window and job_window in driver.window_handles):
+                    driver.switch_to.window(job_window)
+                    driver.close()
+                driver.switch_to.window(search_window)
+            except WebDriverException:
+                pass
 
-        # --- Handle any additional fields (first/last name, submit) ---
-        # Note: These handlers remain from the original script but the new Naukri
-        # uses "Apply on company site" which typically redirects to an external site.
-        # If Naukri's inline application form appears, these will handle it.
-        try:
-            # Check for daily quota expired
-            quota_el = driver.find_element(By.XPATH, "//*[text()='Your daily quota has been expired.']")
-            if quota_el:
-                logger.info("Daily quota expired. Stopping.")
-                break
-        except NoSuchElementException:
-            pass
+        if quota_expired:
+            break
 
-        try:
-            # If first name field is present, fill it
-            driver.find_element(By.XPATH, "//input[@id='CUSTOM-FIRSTNAME']")
-            firstname_el = driver.find_element(By.ID, 'CUSTOM-FIRSTNAME')
-            firstname_el.clear()
-            firstname_el.send_keys(FIRSTNAME)
-            logger.info("  Filled custom first name field")
-        except NoSuchElementException:
-            pass
-
-        try:
-            # If last name field is present, fill it
-            driver.find_element(By.XPATH, "//input[@id='CUSTOM-LASTNAME']")
-            lastname_el = driver.find_element(By.ID, 'CUSTOM-LASTNAME')
-            lastname_el.clear()
-            lastname_el.send_keys(LASTNAME)
-            logger.info("  Filled custom last name field")
-        except NoSuchElementException:
-            pass
-
-        try:
-            # Click "Submit and Apply" if present
-            submit_btn = driver.find_element(By.XPATH, "//*[text()='Submit and Apply']")
-            submit_btn.click()
-            logger.info("  Clicked 'Submit and Apply'")
-            time.sleep(2)
-        except NoSuchElementException:
-            pass
-
-    return applied, failed, skipped, applied_list
+    return applied, failed, skipped, applied_list, quota_expired
 
 
 def save_results(applied_list):
@@ -606,7 +616,7 @@ def main():
     logger.info(f"Keywords: {KEYWORDS}")
     logger.info(f"Location: {LOCATION or 'Anywhere'}")
     logger.info(f"Max applications: {MAX_APPLICATIONS}")
-    logger.info(f"Pages per keyword: {PAGES_PER_KEYWORD}")
+    logger.info("Search pagination: continues until a page has no new jobs")
     logger.info(f"Excluded companies: {', '.join(EXCLUDED_COMPANIES) or 'None'}")
     logger.info(
         f"Experience filter: candidate {CANDIDATE_EXPERIENCE_YEARS:g} years must be strictly "
@@ -627,16 +637,35 @@ def main():
 
         # Build all search URLs
         search_urls = build_search_urls()
-        logger.info(f"Total search pages to open: {len(search_urls)}")
+        logger.info(f"Total keyword searches to paginate: {len(search_urls)}")
 
-        # Collect all job links in parallel (multi-tab)
-        job_links = collect_all_jobs_parallel(driver, search_urls)
+        # Apply every job on a results page before requesting the next page.
+        search_window = driver.current_window_handle
+        processed_any_jobs = False
+        quota_expired = False
+        for keyword, page_num, page_jobs in iter_search_pages(driver, search_urls):
+            processed_any_jobs = True
+            logger.info(
+                f"Starting applications for {keyword} page {page_num} "
+                f"({len(page_jobs)} jobs)"
+            )
+            page_applied, page_failed, page_skipped, page_results, quota_expired = apply_to_jobs(
+                driver,
+                page_jobs,
+                search_window,
+                already_applied=applied,
+            )
+            applied += page_applied
+            failed += page_failed
+            skipped += page_skipped
+            for result_type, links in page_results.items():
+                applied_list[result_type].extend(links)
 
-        if not job_links:
+            if quota_expired or applied >= MAX_APPLICATIONS:
+                break
+
+        if not processed_any_jobs:
             logger.warning("No job links found. Check your keywords and location.")
-        else:
-            # Apply to jobs
-            applied, failed, skipped, applied_list = apply_to_jobs(driver, job_links)
 
         # Save results
         save_results(applied_list)

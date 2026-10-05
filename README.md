@@ -5,7 +5,7 @@
 ## 📋 Features
 
 - ✅ Automatically logs in to Naukri.com
-- ✅ **Multi-tab parallel search** — Opens each keyword category in its own browser tab simultaneously
+- ✅ **Paginated search** — Continues through result pages for every keyword until no new jobs are found
 - ✅ Searches for jobs by keywords and location (updated for 2026 Naukri redesign)
 - ✅ Visits job listings and clicks "Apply" / "Apply on company site"
 - ✅ Handles custom first/last name fields and "Submit and Apply" flow
@@ -15,21 +15,17 @@
 - ✅ Uses **Microsoft Edge** browser
 - ✅ Uses `webdriver-manager` for automatic driver download (no manual setup!)
 
-## 🚀 How Multi-Tab Parallel Search Works
+## 🚀 How Paginated Search Works
 
-Instead of processing each keyword one-by-one (slow), the bot **opens every keyword search page in its own browser tab simultaneously**:
+For each keyword, the bot visits result pages in sequence and keeps going until a page returns no new jobs:
 
 ```
-Keyword: "python developer"  → Tab 1 (Page 1) + Tab 2 (Page 2)
-Keyword: "data analyst"     → Tab 3 (Page 1) + Tab 4 (Page 2)
-Keyword: "software engineer" → Tab 5 (Page 1) + Tab 6 (Page 2)
-...all open at the same time!
+Keyword: "python developer"  → Page 1 → Page 2 → ... → no new jobs
+Keyword: "data analyst"      → Page 1 → Page 2 → ... → no new jobs
+Keyword: "software engineer" → Page 1 → Page 2 → ... → no new jobs
 ```
 
-**Benefits:**
-- ⚡ **Much faster** — all keyword searches load in parallel instead of waiting sequentially
-- 📊 **More jobs found** — each keyword gets equal attention
-- 🔄 **Smart deduplication** — duplicate job links across keywords are automatically removed before applying
+Duplicate job links across keywords and pages are removed before applying.
 
 ## 🚀 Quick Start
 
@@ -86,9 +82,6 @@ KEYWORDS=python developer, data analyst, software engineer
 
 # Location (leave empty for all locations, or specify a city like "bangalore", "mumbai", "remote")
 LOCATION=bangalore
-
-# Number of search result pages to scrape per keyword (default: 2)
-PAGES_PER_KEYWORD=2
 
 # Maximum applications per run (Naukri allows ~100/day)
 MAX_APPLICATIONS=50
