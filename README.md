@@ -8,6 +8,8 @@
 - ✅ **Paginated search** — Continues through result pages for every keyword until no new jobs are found
 - ✅ Searches for jobs by keywords and location (updated for 2026 Naukri redesign)
 - ✅ Visits job listings and clicks "Apply" / "Apply on company site"
+- ✅ Handles Easy Apply questions using saved answers and continues through the form
+- ✅ Waits for manual answers to unknown questions, saves them to `application_answers.csv`, and reuses them later
 - ✅ Handles custom first/last name fields and "Submit and Apply" flow
 - ✅ Detects daily application quota limits
 - ✅ Saves results (passed/failed) to a CSV file
@@ -124,11 +126,14 @@ Naukri-autoapply-bot/
 ├── requirements.txt      # Python dependencies
 ├── README.md             # This file
 ├── application_history.py # Company/role duplicate-application history
+├── application_answers.csv # Learned answers for Easy Apply questions
 ├── applied_jobs.csv      # Persistent company/role application ledger
 ├── Naukri-Edge.py        # Main bot script for Microsoft Edge browser
 ├── Naukri autoapply jobs.ipynb  # Jupyter Notebook version (legacy)
 └── naukriapplied.csv     # Output: applied/failed job links (auto-generated)
 ```
+
+When an Easy Apply question has no saved answer, the Edge bot waits while you answer it in the browser. It then saves the response in `application_answers.csv` and continues the application. Keep the browser open and complete the prompt; the bot does not skip an Easy Apply job just because its question is new.
 
 ## 🔧 Troubleshooting
 

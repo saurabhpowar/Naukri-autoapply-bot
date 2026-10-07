@@ -18,6 +18,9 @@ import os
 import time
 import logging
 import re
+import csv
+import difflib
+from datetime import datetime
 from urllib.parse import urlencode, urlparse
 import pandas as pd
 from dotenv import load_dotenv
@@ -66,6 +69,7 @@ MAX_CANDIDATE_EXPERIENCE_YEARS = float(os.getenv('MAX_CANDIDATE_EXPERIENCE_YEARS
 
 # --- Limits ---
 MAX_APPLICATIONS = int(os.getenv('MAX_APPLICATIONS', '50'))
+ANSWERS_CSV = "application_answers.csv"
 
 # --- Edge Driver Path (optional, only if NOT using webdriver-manager) ---
 EDGE_DRIVER_PATH = os.getenv('EDGE_DRIVER_PATH', '')
@@ -338,85 +342,358 @@ def is_naukri_url(url):
     return hostname.casefold().endswith("naukri.com")
 
 
-def answer_configured_experience_questions(driver):
-    """Answer recognized yes/years questions in the Naukri chatbot drawer."""
+def load_application_answers():
+    """Load saved question and answer pairs for Easy Apply forms."""
+    answers = {}
+    if not os.path.exists(ANSWERS_CSV):
+        logger.info("No existing %s; unknown answers will be learned.", ANSWERS_CSV)
+        return answers
+
     try:
-        WebDriverWait(driver, 3).until(
+        with open(ANSWERS_CSV, "r", encoding="utf-8", newline="") as answer_file:
+            for row in csv.DictReader(answer_file):
+                question = (row.get("question_text") or "").strip()
+                answer = (row.get("answer") or "").strip()
+                if question and answer:
+                    answers[question] = answer
+    except (OSError, csv.Error):
+        logger.exception("Could not load saved application answers from %s", ANSWERS_CSV)
+        raise
+
+    logger.info("Loaded %s saved answers from %s.", len(answers), ANSWERS_CSV)
+    return answers
+
+
+def save_application_answer(question, answer, field_type, known_answers):
+    """Persist a manually supplied answer and make it available for this run."""
+    question = (question or "").strip()
+    answer = (answer or "").strip()
+    if not question or not answer:
+        logger.warning("Not saving an empty form question or answer.")
+        return
+
+    needs_header = not os.path.exists(ANSWERS_CSV) or os.path.getsize(ANSWERS_CSV) == 0
+    try:
+        with open(ANSWERS_CSV, "a", encoding="utf-8", newline="") as answer_file:
+            writer = csv.writer(answer_file)
+            if needs_header:
+                writer.writerow(["question_text", "answer", "field_type", "created_at"])
+            writer.writerow([question, answer, field_type, datetime.now().isoformat()])
+    except OSError:
+        logger.exception("Could not save the answer to %s", ANSWERS_CSV)
+        raise
+
+    known_answers[question] = answer
+    logger.info("Saved answer for future applications: %s", question)
+
+
+def lookup_application_answer(question, known_answers):
+    """Find an exact or sufficiently similar saved answer."""
+    normalized_question = " ".join((question or "").casefold().split())
+    normalized_answers = {
+        " ".join(saved_question.casefold().split()): answer
+        for saved_question, answer in known_answers.items()
+    }
+    if normalized_question in normalized_answers:
+        return normalized_answers[normalized_question]
+
+    matches = difflib.get_close_matches(
+        normalized_question, normalized_answers.keys(), n=1, cutoff=0.88
+    )
+    if matches:
+        logger.info("Using saved answer matching question: %s", matches[0])
+        return normalized_answers[matches[0]]
+    return None
+
+
+def latest_chat_question(driver):
+    questions = driver.find_elements(
+        By.CSS_SELECTOR,
+        ".chatbot_ListItem.botItem .msg, .chatbot_ListItem .botMsg .msg",
+    )
+    return questions[-1].text.strip() if questions else ""
+
+
+def latest_chat_answer(driver):
+    answers = driver.find_elements(
+        By.CSS_SELECTOR, ".chatbot_ListItem.userItem .msg, .userMsg .msg"
+    )
+    return answers[-1].text.strip() if answers else ""
+
+
+def visible_chatbot_element(driver, selector):
+    return next(
+        (
+            element
+            for element in driver.find_elements(By.CSS_SELECTOR, selector)
+            if element.is_displayed() and element.is_enabled()
+        ),
+        None,
+    )
+
+
+def click_chatbot_send(driver):
+    send_button = visible_chatbot_element(
+        driver, ".sendMsg, [class*='sendMsg'], div.sendMsg"
+    )
+    if send_button:
+        driver.execute_script("arguments[0].click();", send_button)
+        return True
+    return False
+
+
+def set_chatbot_text_answer(driver, text_area, answer):
+    driver.execute_script(
+        "arguments[0].focus(); arguments[0].innerText = arguments[1]; "
+        "arguments[0].dispatchEvent(new Event('input', {bubbles: true})); "
+        "arguments[0].dispatchEvent(new Event('change', {bubbles: true}));",
+        text_area,
+        answer,
+    )
+    if not click_chatbot_send(driver):
+        text_area.send_keys(Keys.RETURN)
+
+
+def chatbot_drawer_is_open(driver):
+    containers = driver.find_elements(
+        By.CSS_SELECTOR, "[id*='ChatbotContainer'], .chatbot_Drawer"
+    )
+    return any(container.is_displayed() for container in containers)
+
+
+def answer_application_questions(driver, known_answers):
+    """Answer Easy Apply questions from CSV or wait for manual answers and learn them."""
+    try:
+        WebDriverWait(driver, 10).until(
             EC.presence_of_element_located(
-                (By.CSS_SELECTOR, ".chatbot_ListItem.botItem .msg, .chatbot_ListItem .botMsg .msg")
+                (By.CSS_SELECTOR, "[id*='ChatbotContainer'], .chatbot_Drawer")
             )
         )
     except TimeoutException:
-        return
+        return True
 
     answered_questions = set()
-    for _ in range(5):
-        try:
-            question_elements = driver.find_elements(
-                By.CSS_SELECTOR,
-                ".chatbot_ListItem.botItem .msg, .chatbot_ListItem .botMsg .msg",
-            )
-            question = question_elements[-1].text.strip() if question_elements else ""
-            if question in answered_questions:
-                time.sleep(1)
-                continue
-            answer = configured_experience_answer(question)
-            if not answer:
-                return
+    waiting_seconds = 0
+    logger.info("Easy Apply questionnaire is open. Unknown questions will wait for your answer.")
 
-            radio_containers = driver.find_elements(
-                By.CSS_SELECTOR, ".singleselect-radiobutton-container"
+    while chatbot_drawer_is_open(driver):
+        question = latest_chat_question(driver)
+        if question and question in answered_questions:
+            time.sleep(1)
+            waiting_seconds += 1
+            if waiting_seconds % 30 == 0:
+                logger.info("Waiting for the next form question after answering: %s", question)
+            continue
+
+        radio = visible_chatbot_element(driver, ".singleselect-radiobutton-container")
+        text_area = visible_chatbot_element(
+            driver,
+            ".chatbot_SendMessageContainer .textArea[contenteditable='true'], "
+            ".chatbot_InputContainer .textArea[contenteditable='true'], "
+            "div.textArea[contenteditable='true']",
+        )
+
+        answer = lookup_application_answer(question, known_answers)
+        if answer is None:
+            answer = configured_experience_answer(question)
+
+        if radio:
+            radios = radio.find_elements(By.CSS_SELECTOR, ".ssrc__radio")
+            labels = radio.find_elements(By.CSS_SELECTOR, ".ssrc__label")
+            match = next(
+                (
+                    (option, label)
+                    for option, label in zip(radios, labels)
+                    if answer
+                    and radio_option_matches(
+                        answer, option.get_attribute("value"), label.text
+                    )
+                ),
+                None,
             )
-            visible_radio = next((item for item in radio_containers if item.is_displayed()), None)
-            text_area = None
-            if visible_radio:
-                radios = visible_radio.find_elements(By.CSS_SELECTOR, ".ssrc__radio")
-                labels = visible_radio.find_elements(By.CSS_SELECTOR, ".ssrc__label")
-                matched = False
-                for radio, label in zip(radios, labels):
-                    if radio_option_matches(answer, radio.get_attribute("value"), label.text):
-                        driver.execute_script("arguments[0].click();", label)
-                        matched = True
-                        break
-                if not matched:
-                    logger.warning("No radio option matched configured experience answer: %s", answer)
-                    return
-            else:
-                text_areas = driver.find_elements(
-                    By.CSS_SELECTOR,
+            if match:
+                option, label = match
+                driver.execute_script("arguments[0].click();", label)
+                if not click_chatbot_send(driver):
+                    option.send_keys(Keys.RETURN)
+                logger.info("Answered saved radio question: %s", question)
+                answered_questions.add(question)
+                waiting_seconds = 0
+                time.sleep(2)
+                continue
+
+            options_before = [
+                (
+                    option.get_attribute("value") or label.text.strip(),
+                    option.is_selected(),
+                )
+                for option, label in zip(radios, labels)
+            ]
+            user_count_before = len(
+                driver.find_elements(
+                    By.CSS_SELECTOR, ".chatbot_ListItem.userItem .msg, .userMsg .msg"
+                )
+            )
+            logger.info("Unknown radio question: %s", question)
+            logger.info("Select your answer in the browser; it will be saved for next time.")
+
+            while chatbot_drawer_is_open(driver):
+                time.sleep(1)
+                current_question = latest_chat_question(driver)
+                current_radio = visible_chatbot_element(
+                    driver, ".singleselect-radiobutton-container"
+                )
+                user_count = len(
+                    driver.find_elements(
+                        By.CSS_SELECTOR, ".chatbot_ListItem.userItem .msg, .userMsg .msg"
+                    )
+                )
+                if current_question != question or user_count > user_count_before:
+                    submitted_answer = latest_chat_answer(driver)
+                    if submitted_answer:
+                        save_application_answer(
+                            question, submitted_answer, "radio", known_answers
+                        )
+                    answered_questions.add(question)
+                    break
+                if current_radio:
+                    current_radios = current_radio.find_elements(
+                        By.CSS_SELECTOR, ".ssrc__radio"
+                    )
+                    current_labels = current_radio.find_elements(
+                        By.CSS_SELECTOR, ".ssrc__label"
+                    )
+                    selected = next(
+                        (
+                            (option, label)
+                            for option, label in zip(current_radios, current_labels)
+                            if option.is_selected()
+                        ),
+                        None,
+                    )
+                    if selected:
+                        option, label = selected
+                        selected_value = option.get_attribute("value") or label.text.strip()
+                        previous_selection = next(
+                            (
+                                value
+                                for value, was_selected in options_before
+                                if was_selected
+                            ),
+                            None,
+                        )
+                        if (
+                            selected_value != previous_selection
+                        ):
+                            if not click_chatbot_send(driver):
+                                option.send_keys(Keys.RETURN)
+                            save_application_answer(
+                                question, label.text.strip() or selected_value, "radio",
+                                known_answers,
+                            )
+                            answered_questions.add(question)
+                            break
+                waiting_seconds += 1
+                if waiting_seconds and waiting_seconds % 30 == 0:
+                    logger.info("Still waiting for your answer to: %s", question)
+            waiting_seconds = 0
+            continue
+
+        if text_area:
+            if answer:
+                set_chatbot_text_answer(driver, text_area, answer)
+                logger.info("Answered saved text question: %s", question)
+                answered_questions.add(question)
+                waiting_seconds = 0
+                time.sleep(2)
+                continue
+
+            initial_text = text_area.text.strip()
+            user_count_before = len(
+                driver.find_elements(
+                    By.CSS_SELECTOR, ".chatbot_ListItem.userItem .msg, .userMsg .msg"
+                )
+            )
+            logger.info("Unknown text question: %s", question)
+            logger.info("Type your answer in the browser; it will be sent and saved for next time.")
+            while chatbot_drawer_is_open(driver):
+                time.sleep(1)
+                current_question = latest_chat_question(driver)
+                user_count = len(
+                    driver.find_elements(
+                        By.CSS_SELECTOR, ".chatbot_ListItem.userItem .msg, .userMsg .msg"
+                    )
+                )
+                if user_count > user_count_before:
+                    submitted_answer = latest_chat_answer(driver)
+                    if submitted_answer:
+                        save_application_answer(
+                            question, submitted_answer, "text", known_answers
+                        )
+                    answered_questions.add(question)
+                    break
+                if current_question != question:
+                    submitted_answer = latest_chat_answer(driver)
+                    if submitted_answer:
+                        save_application_answer(
+                            question, submitted_answer, "text", known_answers
+                        )
+                    answered_questions.add(question)
+                    break
+
+                current_text_area = visible_chatbot_element(
+                    driver,
                     ".chatbot_SendMessageContainer .textArea[contenteditable='true'], "
                     ".chatbot_InputContainer .textArea[contenteditable='true'], "
                     "div.textArea[contenteditable='true']",
                 )
-                text_area = next(
-                    (item for item in text_areas if item.is_displayed() and item.is_enabled()), None
-                )
-                if not text_area:
-                    return
-                driver.execute_script(
-                    "arguments[0].focus(); arguments[0].innerText = arguments[1]; "
-                    "arguments[0].dispatchEvent(new Event('input', {bubbles: true})); "
-                    "arguments[0].dispatchEvent(new Event('change', {bubbles: true}));",
-                    text_area,
-                    answer,
-                )
+                if current_text_area:
+                    manual_answer = current_text_area.text.strip()
+                    if manual_answer and manual_answer != initial_text:
+                        if not click_chatbot_send(driver):
+                            current_text_area.send_keys(Keys.RETURN)
+                        save_application_answer(
+                            question, manual_answer, "text", known_answers
+                        )
+                        answered_questions.add(question)
+                        break
 
-            logger.info("Auto-answering experience question with: %s", answer)
-            save_buttons = driver.find_elements(
-                By.CSS_SELECTOR, ".sendMsg, [class*='sendMsg'], div.sendMsg"
+                waiting_seconds += 1
+                if waiting_seconds and waiting_seconds % 30 == 0:
+                    logger.info("Still waiting for your answer to: %s", question)
+            waiting_seconds = 0
+            continue
+
+        logger.info("Question requires manual input: %s", question or "(question not detected)")
+        logger.info("Complete it in the browser; the bot will continue after submission.")
+        user_count_before = len(
+            driver.find_elements(
+                By.CSS_SELECTOR, ".chatbot_ListItem.userItem .msg, .userMsg .msg"
             )
-            save_button = next((item for item in save_buttons if item.is_displayed()), None)
-            if save_button:
-                driver.execute_script("arguments[0].click();", save_button)
-            elif text_area:
-                text_area.send_keys(Keys.RETURN)
-            else:
-                return
-            answered_questions.add(question)
-            time.sleep(2)
-        except (NoSuchElementException, TimeoutException, WebDriverException) as error:
-            logger.debug("Experience question handler stopped: %s", error)
-            return
+        )
+        while chatbot_drawer_is_open(driver):
+            time.sleep(1)
+            current_question = latest_chat_question(driver)
+            user_count = len(
+                driver.find_elements(
+                    By.CSS_SELECTOR, ".chatbot_ListItem.userItem .msg, .userMsg .msg"
+                )
+            )
+            if user_count > user_count_before or current_question != question:
+                submitted_answer = latest_chat_answer(driver)
+                if submitted_answer and question:
+                    save_application_answer(
+                        question, submitted_answer, "manual", known_answers
+                    )
+                answered_questions.add(question)
+                waiting_seconds = 0
+                break
+            waiting_seconds += 1
+            if waiting_seconds and waiting_seconds % 30 == 0:
+                logger.info("Still waiting for your answer to: %s", question)
+
+    logger.info("Easy Apply questionnaire completed.")
+    return True
 
 
 def apply_to_jobs(driver, job_links, search_window, already_applied=0):
@@ -430,6 +707,7 @@ def apply_to_jobs(driver, job_links, search_window, already_applied=0):
     quota_expired = False
     applied_list = {'passed': [], 'failed': [], 'skipped': []}
     applied_jobs = load_applied_jobs()
+    known_answers = load_application_answers()
 
     logger.info("=" * 50)
     logger.info(f"Starting job applications (max: {MAX_APPLICATIONS})...")
@@ -527,7 +805,7 @@ def apply_to_jobs(driver, job_links, search_window, already_applied=0):
             application_window = internal_windows[-1] if internal_windows else None
             if application_window:
                 driver.switch_to.window(application_window)
-                answer_configured_experience_questions(driver)
+                answer_application_questions(driver, known_answers)
 
                 try:
                     quota_el = driver.find_element(
