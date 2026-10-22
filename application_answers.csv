@@ -35,3 +35,56 @@ What is the your highest Education ?,BE,text,2026-10-06T21:11:50.379406
 Please select the city you are currently residing or willing to relocate to,"Pune, Maharashtra",manual,2026-10-06T21:14:05.372025
 Have you ever served in the military?,Never served,manual,2026-10-06T21:14:27.934706
 Are you currently residing in Hyderabad or willing to relocate to Hyderabad?,No,radio,2026-10-06T21:14:35.836960
+How many years of experience do you have in Entity Framework Core?,4 - 5 years,manual,2026-10-07T22:59:33.142591
+Are you currently residing in Pune or willing to relocate to Pune?,Yes,radio,2026-10-07T23:00:22.337168
+Latest version of Angular experience (hands-on project experience),2,text,2026-10-07T23:01:57.576397
+Are you currently in Hyderabad?,Yes,radio,2026-10-07T23:09:17.229360
+Please select the city you are currently residing or willing to relocate to,Pune,manual,2026-10-07T23:09:53.537796
+Are you currently residing in Bengaluru or willing to relocate to Bengaluru?,Yes,radio,2026-10-07T23:11:22.531455
+Are you fine with 3rd party payroll and CTH?,Y,text,2026-10-07T23:12:14.067610
+Do you have exp. in Node.js?,3,text,2026-10-07T23:15:03.239246
+background verification is very strict. 5 year bank statement - showing salary credit is needed,"Yes, I can give bank statement for last 5 years",radio,2026-10-08T21:07:43.870010
+you should not have much gaps from education to job and between jobs. What are your gap?,None of the above and not much gap,radio,2026-10-08T21:13:19.272773
+PAN number is mandatory to process. Please give PAN number,ET,text,2026-10-08T21:13:25.321316
+What is your preferred Location?,Pune,radio,2026-10-08T21:13:32.068036
+"Do you have offer? If yes, please give Offer Amount and Last Working Day in current company",n,text,2026-10-08T21:13:36.904964
+Please mention your Top 3 Skills,.Ne,text,2026-10-08T21:13:41.969863
+Please select the city you are currently residing or willing to relocate to,"Hyderabad, Pune",manual,2026-10-08T21:15:02.800642
+Willing to Work Techouts Payroll? Y/N,y,text,2026-10-08T21:25:14.089815
+Please select the city you are currently residing or willing to relocate to,"Hyderabad, Pune",manual,2026-10-08T21:31:57.510453
+What best describes your SQL Server experience?,"Advanced query optimization, indexing, and database design",radio,2026-10-08T21:36:28.422988
+Which best describes your experience with CI/CD and SDLC practices?,"Built or managed CI/CD pipelines using tools such as Bitbucket, TeamCity, Octopus, Azure DevOps, etc",radio,2026-10-08T21:36:34.388578
+What is your CGPA Score?,Between 7 to 8,radio,2026-10-08T21:36:46.764206
+How do you rate your communication Skills?,Excellent,radio,2026-10-08T21:36:50.607621
+"This role is based in Jasola, Delhi. Are you comfortable working from there ?",Yes,radio,2026-10-08T21:36:55.144451
+Are you comfortable for F2F Interview on 10th October (Saturday) at Navi Mumbai location?,Yes,text,2026-10-08T21:37:27.608231
+Do you have exp. into Product base/Fintech/BFSI Domain?,Ye,text,2026-10-08T21:37:38.458594
+PAN Number,E,text,2026-10-08T21:40:27.938704
+Are you willing to attend Face to Face interview in Chennai Location?,Yes,radio,2026-10-08T21:40:35.166854
+Are you currently residing in Chennai or willing to relocate to Chennai?,Yes,radio,2026-10-08T21:40:37.866970
+Are you currently serving your notice period or are an immediate joiner?,Yes,radio,2026-10-08T21:43:48.941601
+Are you currently living in Pune ?,ye,text,2026-10-22T22:25:19.865330
+If you are Serving your Notice Period what is your last working day ?,31/,text,2026-10-22T22:25:29.510855
+Please select the city you are currently residing or willing to relocate to,"Bengaluru, Hyderabad, Mumbai",manual,2026-10-22T22:26:22.185072
+"Are you a full Stack Developer with ,Net, Angular and SQl Server skills?",Yes,radio,2026-10-22T22:34:34.426727
+Can you communicate good english and attend client call?,Yes,radio,2026-10-22T22:34:37.782898
+Can you work in US shift (Night shift)and occasionally afternoon Shift?,Yes,radio,2026-10-22T22:34:41.332296
+What is your current salary and Expected Salary? Short Answer,950,text,2026-10-22T22:34:49.926870
+Are you staying in Hyderabad?,Yes,radio,2026-10-22T22:35:00.518930
+Can you attend F2F interview in next 2 weeks?,Yes,radio,2026-10-22T22:35:02.819104
+Are you currently in Chennai?,Yes,radio,2026-10-22T22:56:42.146828
+Are you an immediate joiner?,Yes,radio,2026-10-22T22:56:45.508856
+Which Angular version have you used in production? Have you worked with AngularJS 1.x?,21,text,2026-10-22T22:56:50.955797
+"Which database have you used most: Oracle, SQL Server or PostgreSQL?",SQ,text,2026-10-22T22:56:56.367199
+Are you comfortable working from the office five days a week?,Yes,radio,2026-10-22T22:57:01.823105
+Which of these locations are you willing to relocate to?,Hyderabad,manual,2026-10-22T22:58:43.930359
+"Experience you have with C#, .NET or .NET Core, and ASP.NET MVC/Web API?",4+ Years,radio,2026-10-22T22:59:27.243273
+Experience with SQL Server and ORM technologies?,"All the above, including indexing & query optimisation",radio,2026-10-22T22:59:32.958393
+Experience in developing REST APIs using ASP.NET Web API or .NET Core?,"Design, develop, integrate and maintain production REST APIs",radio,2026-10-22T22:59:35.382663
+Which software design principles have you applied in your projects?,"OOP, SOLID principles and design patterns",radio,2026-10-22T22:59:38.805776
+Which of these locations are you willing to relocate to?,"Bengaluru, Pune",manual,2026-10-22T22:59:55.957278
+Are you currently residing in Thiruvananthapuram or willing to relocate to Thiruvananthapuram?,Yes,radio,2026-10-22T23:01:17.421522
+Are you available for virtual discussion on 23-10-2026 ? mention the availability time?,6p,text,2026-10-22T23:07:36.463894
+what is your last working day if applicable ?,30,text,2026-10-22T23:07:43.935109
+Are you available for face to face interview on 24 october 2026,yes,radio,2026-10-22T23:12:21.367069
+What is your Last Working day?,30,text,2026-10-22T23:18:26.371269

@@ -30,7 +30,12 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.edge.service import Service as EdgeService
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.common.exceptions import TimeoutException, NoSuchElementException, WebDriverException
+from selenium.common.exceptions import (
+    NoSuchElementException,
+    StaleElementReferenceException,
+    TimeoutException,
+    WebDriverException,
+)
 from bs4 import BeautifulSoup
 from application_history import clean_expired_jobs, load_applied_jobs, normalize_job, record_applied_job
 from experience_answers import configured_experience_answer, radio_option_matches
@@ -406,19 +411,28 @@ def lookup_application_answer(question, known_answers):
     return None
 
 
+def latest_chat_message(driver, selector):
+    """Read the latest chatbot message, retrying briefly if the form re-renders."""
+    for attempt in range(3):
+        try:
+            messages = driver.find_elements(By.CSS_SELECTOR, selector)
+            return messages[-1].text.strip() if messages else ""
+        except StaleElementReferenceException:
+            if attempt == 2:
+                raise
+            time.sleep(0.2)
+
+
 def latest_chat_question(driver):
-    questions = driver.find_elements(
-        By.CSS_SELECTOR,
-        ".chatbot_ListItem.botItem .msg, .chatbot_ListItem .botMsg .msg",
+    return latest_chat_message(
+        driver, ".chatbot_ListItem.botItem .msg, .chatbot_ListItem .botMsg .msg"
     )
-    return questions[-1].text.strip() if questions else ""
 
 
 def latest_chat_answer(driver):
-    answers = driver.find_elements(
-        By.CSS_SELECTOR, ".chatbot_ListItem.userItem .msg, .userMsg .msg"
+    return latest_chat_message(
+        driver, ".chatbot_ListItem.userItem .msg, .userMsg .msg"
     )
-    return answers[-1].text.strip() if answers else ""
 
 
 def visible_chatbot_element(driver, selector):
@@ -849,6 +863,17 @@ def apply_to_jobs(driver, job_links, search_window, already_applied=0):
             record_applied_job(company, role, link)
             applied_jobs.add(job_key)
             logger.info(f"  ✓ Apply flow completed. Total: {already_applied + applied}")
+        except StaleElementReferenceException:
+            failed += 1
+            applied_list['failed'].append(link)
+            logger.exception(
+                "[%s/%s] Page updated while processing %s | %s; "
+                "recording this job as failed and continuing.",
+                i,
+                len(job_links),
+                company,
+                role,
+            )
         finally:
             for handle in internal_windows:
                 try:
