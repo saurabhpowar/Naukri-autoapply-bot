@@ -88,3 +88,24 @@ Are you available for virtual discussion on 23-10-2026 ? mention the availabilit
 what is your last working day if applicable ?,30,text,2026-10-22T23:07:43.935109
 Are you available for face to face interview on 24 october 2026,yes,radio,2026-10-22T23:12:21.367069
 What is your Last Working day?,30,text,2026-10-22T23:18:26.371269
+Are you okay with Night Shift ?,Yes,radio,2026-10-27T23:14:30.917267
+Date of Birth as per Certificate :,25,text,2026-10-27T23:16:30.237975
+"Are you willing to relocate to Bangalore, Chennai, Hyderabad, Pune Location","Hyderabad, Telangana, Pune, Maharashtra, Bangalore & Chennai - Karnataka",manual,2026-10-27T23:16:48.956916
+Which of these locations are you willing to relocate to?,"Pune, Bengaluru, Chennai, hyderabad",manual,2026-10-27T23:17:51.011412
+How many years of professional experience do you have in C# and .NET application development?,6,manual,2026-10-27T23:18:16.711343
+How many years of hands-on experience do you have in C++ programming and Object-Oriented Programming (OOP)?,5,manual,2026-10-27T23:18:20.002432
+How many years of hands-on experience do you have developing web applications using ASP.NET MVC and RESTful Web APIs?,5,manual,2026-10-27T23:18:21.136608
+Can you join immediately or within 15 days?,Yes,manual,2026-10-27T23:18:25.386779
+Are you currently living in or ready to relocate to Chennai ?,Yes,radio,2026-10-27T23:20:19.773121
+"Are you currently residing in Salem, Tamil Nadu or willing to relocate to Salem, Tamil Nadu?",Yes,radio,2026-10-27T23:25:51.127995
+what is your Relevant experience in FACETS?,5,text,2026-10-27T23:26:52.803264
+"Are you currently residing in Bengaluru, Karnataka or willing to relocate to Bengaluru, Karnataka?",Yes,radio,2026-10-27T23:32:12.260018
+"Please select the city you are currently residing or willing to relocate to Bangalore, Chennai, Hyderabad, Pune","Hyderabad, Telangana, Pune, Maharashtra, Bangalore & Chennai - Karnataka",manual,2026-10-27T23:33:10.434850
+Mention your LWD is DD/MM/YYYY format,01,text,2026-10-27T23:33:30.874487
+What is the reason you are looking for a Job Change?,g,text,2026-10-27T23:33:41.604565
+"Are you currently residing in Noida, Uttar Pradesh or willing to relocate to Noida, Uttar Pradesh?",Yes,radio,2026-10-27T23:36:24.977247
+Are you legally eligible to work in this country?,Yes,radio,2026-10-27T23:45:34.336984
+Are you related to anyone working at Vanderlande at present?,No,radio,2026-10-27T23:45:44.266916
+Are you willing to relocate to Pune? (if applicable),Yes,radio,2026-10-27T23:45:48.692093
+What is your current annual fixed compensation? Excluding variable,8 - 10 LPA,radio,2026-10-27T23:45:57.909694
+How soon can you start?,Within 60 days,radio,2026-10-27T23:46:08.661036

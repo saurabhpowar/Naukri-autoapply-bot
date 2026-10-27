@@ -89,6 +89,23 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+NAUKRI_REQUEST_ERROR = (
+    "there was an error while processing your request, please try again later"
+)
+
+
+class NaukriRequestError(RuntimeError):
+    """Raised when Naukri displays its temporary request-error page."""
+
+
+def check_naukri_request_error(driver):
+    """Stop automation if Naukri displays its temporary request-error message."""
+    page_source = re.sub(r"\s+", " ", driver.page_source).casefold()
+    if NAUKRI_REQUEST_ERROR in page_source:
+        raise NaukriRequestError(
+            "Naukri reported an error while processing the request."
+        )
+
 
 def validate_config():
     """Check that required configuration values are set."""
@@ -318,6 +335,7 @@ def click_apply_button(driver, link):
     """
     # First, wait for the page to load
     time.sleep(4)
+    check_naukri_request_error(driver)
 
     # Try to find and click the apply button (updated selector)
     # New: button text is "Apply on company site", id="company-site-button"
@@ -446,13 +464,86 @@ def visible_chatbot_element(driver, selector):
     )
 
 
+def click_save_button(driver, button):
+    """Click a visible submit/save button, including (Save/Proceed/Next) form actions."""
+    if button is None:
+        return False
+    try:
+        if not button.is_displayed() or button.get_attribute("disabled") is not None:
+            return False
+    except Exception:
+        return False
+
+    try:
+        driver.execute_script(
+            "arguments[0].scrollIntoView({block: 'center', inline: 'center'}); arguments[0].click();",
+            button,
+        )
+        return True
+    except Exception:
+        pass
+
+    try:
+        button.click()
+        return True
+    except Exception:
+        pass
+
+    try:
+        button.send_keys(Keys.ENTER)
+        return True
+    except Exception:
+        return False
+
+
+def find_save_button(driver):
+    """Find the chat send or form submit button, including Save/Proceed/Next variants."""
+    selectors = [
+        ".sendMsg",
+        ".sendMsgbtn_container .sendMsg",
+        "[class*='sendMsg']",
+        "div.sendMsg",
+        "button[type='submit']",
+        "button[type='button']",
+        "button",
+        "input[type='submit']",
+        "[role='button']",
+    ]
+    try:
+        for selector in selectors:
+            for element in driver.find_elements(By.CSS_SELECTOR, selector):
+                try:
+                    if not element.is_displayed():
+                        continue
+                    if element.get_attribute("disabled") is not None:
+                        continue
+                    text = (
+                        element.text or
+                        element.get_attribute("value") or
+                        element.get_attribute("aria-label") or
+                        ""
+                    ).strip()
+                    if any(token in text.casefold() for token in [
+                        "save", "proceed", "continue", "next", "submit", "send", "done"
+                    ]):
+                        return element
+                except Exception:
+                    continue
+    except Exception:
+        pass
+    return None
+
+
 def click_chatbot_send(driver):
     send_button = visible_chatbot_element(
         driver, ".sendMsg, [class*='sendMsg'], div.sendMsg"
     )
     if send_button:
-        driver.execute_script("arguments[0].click();", send_button)
-        return True
+        return click_save_button(driver, send_button)
+
+    save_button = find_save_button(driver)
+    if save_button:
+        return click_save_button(driver, save_button)
     return False
 
 
@@ -465,7 +556,11 @@ def set_chatbot_text_answer(driver, text_area, answer):
         answer,
     )
     if not click_chatbot_send(driver):
-        text_area.send_keys(Keys.RETURN)
+        save_button = find_save_button(driver)
+        if save_button:
+            click_save_button(driver, save_button)
+        else:
+            text_area.send_keys(Keys.RETURN)
 
 
 def chatbot_drawer_is_open(driver):
@@ -529,7 +624,11 @@ def answer_application_questions(driver, known_answers):
                 option, label = match
                 driver.execute_script("arguments[0].click();", label)
                 if not click_chatbot_send(driver):
-                    option.send_keys(Keys.RETURN)
+                    save_button = find_save_button(driver)
+                    if save_button:
+                        click_save_button(driver, save_button)
+                    else:
+                        option.send_keys(Keys.RETURN)
                 logger.info("Answered saved radio question: %s", question)
                 answered_questions.add(question)
                 waiting_seconds = 0
@@ -616,6 +715,9 @@ def answer_application_questions(driver, known_answers):
         if text_area:
             if answer:
                 set_chatbot_text_answer(driver, text_area, answer)
+                save_button = find_save_button(driver)
+                if save_button:
+                    click_save_button(driver, save_button)
                 logger.info("Answered saved text question: %s", question)
                 answered_questions.add(question)
                 waiting_seconds = 0
@@ -713,12 +815,14 @@ def answer_application_questions(driver, known_answers):
 def apply_to_jobs(driver, job_links, search_window, already_applied=0):
     """
     Visit each job link and attempt to apply.
-    Returns applied, failed, and skipped counts, results, and quota status.
+    Returns applied, failed, and skipped counts, results, quota status, and
+    whether Naukri displayed its temporary request-error message.
     """
     applied = 0
     failed = 0
     skipped = 0
     quota_expired = False
+    request_error_detected = False
     applied_list = {'passed': [], 'failed': [], 'skipped': []}
     applied_jobs = load_applied_jobs()
     known_answers = load_application_answers()
@@ -787,6 +891,7 @@ def apply_to_jobs(driver, job_links, search_window, already_applied=0):
             continue
 
         try:
+            check_naukri_request_error(driver)
             handles_before_apply = set(driver.window_handles)
             if not click_apply_button(driver, link):
                 failed += 1
@@ -795,6 +900,7 @@ def apply_to_jobs(driver, job_links, search_window, already_applied=0):
                 continue
 
             time.sleep(2)
+            check_naukri_request_error(driver)
             new_windows = set(driver.window_handles) - handles_before_apply
             for handle in new_windows:
                 try:
@@ -820,6 +926,7 @@ def apply_to_jobs(driver, job_links, search_window, already_applied=0):
             if application_window:
                 driver.switch_to.window(application_window)
                 answer_application_questions(driver, known_answers)
+                check_naukri_request_error(driver)
 
                 try:
                     quota_el = driver.find_element(
@@ -858,11 +965,23 @@ def apply_to_jobs(driver, job_links, search_window, already_applied=0):
                     except NoSuchElementException:
                         pass
 
+                check_naukri_request_error(driver)
+
             applied += 1
             applied_list['passed'].append(link)
             record_applied_job(company, role, link)
             applied_jobs.add(job_key)
             logger.info(f"  ✓ Apply flow completed. Total: {already_applied + applied}")
+        except NaukriRequestError:
+            request_error_detected = True
+            failed += 1
+            applied_list['failed'].append(link)
+            logger.exception(
+                "[%s/%s] Naukri displayed a temporary request error. "
+                "Stopping the application run.",
+                i,
+                len(job_links),
+            )
         except StaleElementReferenceException:
             failed += 1
             applied_list['failed'].append(link)
@@ -891,10 +1010,12 @@ def apply_to_jobs(driver, job_links, search_window, already_applied=0):
             except WebDriverException:
                 pass
 
+        if request_error_detected:
+            break
         if quota_expired:
             break
 
-    return applied, failed, skipped, applied_list, quota_expired
+    return applied, failed, skipped, applied_list, quota_expired, request_error_detected
 
 
 def save_results(applied_list):
@@ -904,6 +1025,39 @@ def save_results(applied_list):
     df = pd.DataFrame.from_dict(final_dict)
     df.to_csv(csv_file, index=False)
     logger.info(f"Results saved to {csv_file}")
+
+
+def show_retry_prompt():
+    """Pause for confirmation before exiting after Naukri reports a request error."""
+    message = (
+        "Naukri could not process the request. Please try again sometime.\n\n"
+        "Click OK to exit."
+    )
+
+    def wait_for_console_confirmation():
+        try:
+            input(f"{message} Press Enter to exit.")
+        except EOFError:
+            logger.warning("No interactive console available to show the retry prompt.")
+
+    try:
+        import tkinter as tk
+        from tkinter import messagebox
+    except ImportError:
+        logger.exception("Tkinter is unavailable; using a console prompt instead.")
+        wait_for_console_confirmation()
+        return
+
+    try:
+        root = tk.Tk()
+        root.withdraw()
+        try:
+            messagebox.showinfo("Naukri request error", message, parent=root)
+        finally:
+            root.destroy()
+    except tk.TclError:
+        logger.exception("Could not open the retry dialog; using a console prompt instead.")
+        wait_for_console_confirmation()
 
 
 def main():
@@ -931,6 +1085,7 @@ def main():
     applied = failed = skipped = 0
     applied_list = {'passed': [], 'failed': [], 'skipped': []}
     results_saved = False
+    request_error_detected = False
     try:
         # Initialize browser
         driver = create_edge_driver()
@@ -952,7 +1107,14 @@ def main():
                 f"Starting applications for {keyword} page {page_num} "
                 f"({len(page_jobs)} jobs)"
             )
-            page_applied, page_failed, page_skipped, page_results, quota_expired = apply_to_jobs(
+            (
+                page_applied,
+                page_failed,
+                page_skipped,
+                page_results,
+                quota_expired,
+                request_error_detected,
+            ) = apply_to_jobs(
                 driver,
                 page_jobs,
                 search_window,
@@ -964,7 +1126,7 @@ def main():
             for result_type, links in page_results.items():
                 applied_list[result_type].extend(links)
 
-            if quota_expired or applied >= MAX_APPLICATIONS:
+            if request_error_detected or quota_expired or applied >= MAX_APPLICATIONS:
                 break
 
         if not processed_any_jobs:
@@ -989,10 +1151,13 @@ def main():
                 else:
                     logger.info("  Results saved to:    no results file written")
                 logger.info("=" * 50)
-                try:
-                    input("Review the summary above. Press Enter to close the browser...")
-                except EOFError:
-                    logger.warning("No interactive console available; closing the browser.")
+                if request_error_detected:
+                    show_retry_prompt()
+                else:
+                    try:
+                        input("Review the summary above. Press Enter to close the browser...")
+                    except EOFError:
+                        logger.warning("No interactive console available; closing the browser.")
                 driver.quit()
                 logger.info("Browser closed.")
             except Exception:

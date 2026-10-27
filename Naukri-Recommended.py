@@ -646,15 +646,36 @@ def handle_contenteditable(driver, known_answers):
 
 
 def click_save_button(driver, save_btn):
-    """Click the save/send button, tolerating a missing 'send' ancestor."""
+    """Click the save/send button, including generic form submit actions."""
+    if not save_btn:
+        return False
+    try:
+        if not save_btn.is_displayed() or save_btn.get_attribute('disabled') is not None:
+            return False
+    except Exception:
+        return False
     try:
         parent = save_btn.find_element(By.XPATH, "./ancestor::*[contains(@class,'send')]")
         if 'disabled' in (parent.get_attribute('class') or ''):
-            return False  # genuinely disabled
+            return False
     except Exception:
-        pass  # no such ancestor — try clicking anyway
-    driver.execute_script("arguments[0].click();", save_btn)
-    return True
+        pass
+    try:
+        driver.execute_script(
+            "arguments[0].scrollIntoView({block: 'center', inline: 'center'}); arguments[0].click();",
+            save_btn,
+        )
+        return True
+    except Exception:
+        try:
+            save_btn.click()
+            return True
+        except Exception:
+            try:
+                save_btn.send_keys(Keys.ENTER)
+                return True
+            except Exception:
+                return False
 
 
 def find_chat_text_area(driver):
@@ -679,22 +700,31 @@ def find_chat_text_area(driver):
 
 
 def find_save_button(driver):
-    """
-    Find the Save/Send button in the chatbot footer.
-    Uses generic selectors since the IDs are dynamic.
-    """
+    """Find the Save/Send/Proceed/Next button in the chatbot footer or form."""
     try:
         selectors = [
             ".sendMsg",
             ".sendMsgbtn_container .sendMsg",
             "[class*='sendMsg']",
             "div.sendMsg",
+            "button[type='submit']",
+            "button",
+            "input[type='submit']",
+            "[role='button']",
         ]
         for sel in selectors:
             els = driver.find_elements(By.CSS_SELECTOR, sel)
             for el in els:
-                if el.is_displayed():
-                    return el
+                try:
+                    if not el.is_displayed() or el.get_attribute('disabled') is not None:
+                        continue
+                    text = (el.text or el.get_attribute('value') or el.get_attribute('aria-label') or '').strip()
+                    if any(token in text.casefold() for token in [
+                        'save', 'proceed', 'continue', 'next', 'submit', 'send', 'done'
+                    ]):
+                        return el
+                except Exception:
+                    continue
     except Exception:
         pass
     return None

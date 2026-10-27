@@ -144,6 +144,7 @@ When an Easy Apply question has no saved answer, the Edge bot waits while you an
 | Login failed | Double-check your `NAUKRI_EMAIL` and `NAUKRI_PASSWORD` in `.env` |
 | No jobs found | Try broader keywords or remove the location filter |
 | `StaleElementReferenceException` while answering Easy Apply questions | The bot retries chatbot message reads after the form updates. If an element remains stale, that job is recorded as failed and processing continues with the next job. |
+| Naukri says "There was an error while processing your request" | The bot stops applying, saves the results, and shows a dialog asking you to try again sometime. Click **OK** to exit. |
 | "Daily quota expired" | Naukri limits daily applications. Try again the next day. |
 | Script too fast/slow | Adjust the `time.sleep()` values in the script if needed |
 | "Apply on company site" opens external site | This is expected — many Naukri jobs now redirect to company career pages |
