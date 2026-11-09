@@ -69,8 +69,8 @@ EXCLUDED_COMPANIES = [
     if company.strip()
 ]
 CANDIDATE_EXPERIENCE_YEARS = float(os.getenv('CANDIDATE_EXPERIENCE_YEARS', '5.4'))
-MIN_CANDIDATE_EXPERIENCE_YEARS = float(os.getenv('MIN_CANDIDATE_EXPERIENCE_YEARS', '4'))
-MAX_CANDIDATE_EXPERIENCE_YEARS = float(os.getenv('MAX_CANDIDATE_EXPERIENCE_YEARS', '6'))
+MIN_CANDIDATE_EXPERIENCE_YEARS = float(os.getenv('MIN_CANDIDATE_EXPERIENCE_YEARS', '3'))
+MAX_CANDIDATE_EXPERIENCE_YEARS = float(os.getenv('MAX_CANDIDATE_EXPERIENCE_YEARS', '7'))
 
 # --- Limits ---
 MAX_APPLICATIONS = int(os.getenv('MAX_APPLICATIONS', '50'))
@@ -133,7 +133,7 @@ def validate_config():
 
 
 def parse_experience_range(text):
-    """Extract an explicit experience range such as '4-6 Yrs' or '4 to 6 years'."""
+    """Extract an explicit experience range such as '3-7 Yrs' or '3 to 7 years'."""
     match = re.search(
         r'(?<!\d)(\d+(?:\.\d+)?)\s*(?:-\s*to\s*-?|to|-)' 
         r'\s*(\d+(?:\.\d+)?)\s*-?\s*(?:years?|yrs?)\b',

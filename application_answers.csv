@@ -109,3 +109,31 @@ Are you related to anyone working at Vanderlande at present?,No,radio,2026-10-27
 Are you willing to relocate to Pune? (if applicable),Yes,radio,2026-10-27T23:45:48.692093
 What is your current annual fixed compensation? Excluding variable,8 - 10 LPA,radio,2026-10-27T23:45:57.909694
 How soon can you start?,Within 60 days,radio,2026-10-27T23:46:08.661036
+What is your notice period?,1 Month,radio,2026-11-04T23:30:12.203164
+Are you available on saturday for F2F Interview,Yes,text,2026-11-04T23:30:39.303771
+Which of these locations are you willing to relocate to?,"Pune, Bengaluru, hyderabad",manual,2026-11-04T23:33:35.900164
+Are you available for F2F interview?,YES,radio,2026-11-04T23:36:11.677787
+Are you available to join immediately?,YES,radio,2026-11-04T23:36:17.222308
+Please select the city you are currently residing or willing to relocate to,"Ahmedabad, Bengaluru",manual,2026-11-04T23:36:35.629957
+Are you willing to work in Contract-to-Hire ?,Y,text,2026-11-04T23:42:22.263486
+Any experience in React native? How mmuch,5,text,2026-11-04T23:46:46.992061
+Are you comfortable working in rotational shift - 24/7? Including Night Shift?,Yes,text,2026-11-04T23:48:03.132704
+"Are you currently residing in Gurugram, Haryana or willing to relocate to Gurugram, Haryana?",Yes,radio,2026-11-04T23:50:03.762506
+Current Location,I made a mistake,text,2026-11-04T23:56:28.542988
+Highest Educational Qualification,Bachelors,radio,2026-11-04T23:56:45.781098
+What is your current CTC ?,9,text,2026-11-04T23:57:16.581449
+What is your expected CTC ?,0,text,2026-11-04T23:57:29.482087
+Please select the city you are currently residing or willing to relocate to,"Gurugram, Vadodara",manual,2026-11-04T23:57:47.624319
+Are you comfortable working 5 days from office?,Yes,radio,2026-11-04T23:57:51.170916
+Please select the city you are currently residing or willing to relocate to,Bengaluru,manual,2026-11-04T23:59:07.969228
+Please do share ur Pan Card Number as it is mandatory for the portal ?,ETXP,text,2026-11-05T00:15:11.796694
+"how many years of exp into C#, Dotnet, Angular etc.?",5,text,2026-11-05T00:15:44.137819
+How many years of exp into web and mobile application ?,5,text,2026-11-05T00:19:00.564294
+How many Years of experience in .Net Full stack Developer with Angular,4,manual,2026-11-05T00:21:30.856164
+Please select the city you are currently residing or willing to relocate to,"Bengaluru, Mumbai (All Areas)",manual,2026-11-05T00:21:34.092750
+Please select the city you are currently residing or willing to relocate to,Bengaluru,manual,2026-11-05T00:22:35.516749
+Do you have the experince in kubernates?,5,text,2026-11-09T10:17:01.961110
+Are you presently availble in bangalore?,YES,radio,2026-11-09T10:17:07.440351
+"2nd round is manadatory F2F, are you available to attend?",YES,radio,2026-11-09T10:17:09.980332
+Which of these locations are you willing to relocate to?,"Pune, Bengaluru, Chennai, hyderabad",manual,2026-11-09T10:20:07.143342
+are u comfortable with 5 days work from office,YES,radio,2026-11-09T10:20:14.894967
