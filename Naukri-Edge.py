@@ -20,6 +20,7 @@ import logging
 import re
 import csv
 import difflib
+import traceback
 from datetime import datetime
 from urllib.parse import urlencode, urlparse
 import pandas as pd
@@ -76,6 +77,7 @@ MAX_CANDIDATE_EXPERIENCE_YEARS = float(os.getenv('MAX_CANDIDATE_EXPERIENCE_YEARS
 # --- Limits ---
 MAX_APPLICATIONS = int(os.getenv('MAX_APPLICATIONS', '50'))
 ANSWERS_CSV = "application_answers.csv"
+ERROR_LOG_CSV = "application_errors.csv"
 
 # --- Edge Driver Path (optional, only if NOT using webdriver-manager) ---
 EDGE_DRIVER_PATH = os.getenv('EDGE_DRIVER_PATH', '')
@@ -97,6 +99,63 @@ NAUKRI_REQUEST_ERROR = (
 
 class NaukriRequestError(RuntimeError):
     """Raised when Naukri displays its temporary request-error page."""
+
+
+def log_application_error(
+    error,
+    context,
+    job_index="",
+    job_count="",
+    company="",
+    role="",
+    job_url="",
+):
+    """Append exception details and job context to the application error CSV."""
+    fieldnames = [
+        "timestamp",
+        "context",
+        "job_index",
+        "job_count",
+        "company",
+        "role",
+        "job_url",
+        "exception_type",
+        "error_message",
+        "traceback",
+    ]
+    row = {
+        "timestamp": datetime.now().astimezone().isoformat(timespec="seconds"),
+        "context": context,
+        "job_index": job_index,
+        "job_count": job_count,
+        "company": company,
+        "role": role,
+        "job_url": job_url,
+        "exception_type": type(error).__name__,
+        "error_message": str(error),
+        "traceback": "".join(
+            traceback.format_exception(type(error), error, error.__traceback__)
+        ),
+    }
+
+    try:
+        needs_header = (
+            not os.path.exists(ERROR_LOG_CSV) or os.path.getsize(ERROR_LOG_CSV) == 0
+        )
+        with open(ERROR_LOG_CSV, "a", encoding="utf-8", newline="") as error_file:
+            writer = csv.DictWriter(error_file, fieldnames=fieldnames)
+            if needs_header:
+                writer.writeheader()
+            writer.writerow(row)
+    except (OSError, csv.Error) as log_error:
+        logger.error(
+            "Could not write exception details to %s: %s",
+            ERROR_LOG_CSV,
+            log_error,
+        )
+        return False
+
+    return True
 
 
 def check_naukri_request_error(driver):
@@ -385,8 +444,8 @@ def load_application_answers():
                 answer = (row.get("answer") or "").strip()
                 if question and answer:
                     answers[question] = answer
-    except (OSError, csv.Error):
-        logger.exception("Could not load saved application answers from %s", ANSWERS_CSV)
+    except (OSError, csv.Error) as error:
+        logger.error("Could not load saved application answers from %s: %s", ANSWERS_CSV, error)
         raise
 
     logger.info("Loaded %s saved answers from %s.", len(answers), ANSWERS_CSV)
@@ -408,8 +467,8 @@ def save_application_answer(question, answer, field_type, known_answers):
             if needs_header:
                 writer.writerow(["question_text", "answer", "field_type", "created_at"])
             writer.writerow([question, answer, field_type, datetime.now().isoformat()])
-    except OSError:
-        logger.exception("Could not save the answer to %s", ANSWERS_CSV)
+    except OSError as error:
+        logger.error("Could not save the answer to %s: %s", ANSWERS_CSV, error)
         raise
 
     known_answers[question] = answer
@@ -879,26 +938,62 @@ def apply_to_jobs(driver, job_links, search_window, already_applied=0):
         job_window = None
         internal_windows = []
         external_windows = set()
+        stage = "opening_job_page"
         try:
             driver.switch_to.new_window('tab')
             job_window = driver.current_window_handle
             driver.get(link)
-        except WebDriverException as e:
-            logger.warning(f"  ✗ Failed to load page: {e}")
+        except Exception as e:
+            error_recorded = log_application_error(
+                e, stage, i, len(job_links), company, role, link
+            )
+            logger.error(
+                "[%s/%s] Failed to load %s | %s. %s",
+                i,
+                len(job_links),
+                company,
+                role,
+                (
+                    f"Details recorded in {ERROR_LOG_CSV}."
+                    if error_recorded
+                    else f"Could not record details in {ERROR_LOG_CSV}."
+                ),
+            )
             failed += 1
             applied_list['failed'].append(link)
             try:
                 if job_window and job_window in driver.window_handles:
                     driver.switch_to.window(job_window)
                     driver.close()
-            except WebDriverException:
-                pass
-            driver.switch_to.window(search_window)
+            except Exception as cleanup_error:
+                log_application_error(
+                    cleanup_error,
+                    "close_failed_job_tab",
+                    i,
+                    len(job_links),
+                    company,
+                    role,
+                    link,
+                )
+            try:
+                driver.switch_to.window(search_window)
+            except Exception as restore_error:
+                log_application_error(
+                    restore_error,
+                    "restore_search_window",
+                    i,
+                    len(job_links),
+                    company,
+                    role,
+                    link,
+                )
             continue
 
         try:
+            stage = "checking_job_page"
             check_naukri_request_error(driver)
             handles_before_apply = set(driver.window_handles)
+            stage = "clicking_apply_button"
             if not click_apply_button(driver, link):
                 failed += 1
                 applied_list['failed'].append(link)
@@ -917,7 +1012,16 @@ def apply_to_jobs(driver, job_links, search_window, already_applied=0):
                     else:
                         external_windows.add(handle)
                         logger.info("  External application opened in a separate tab.")
-                except WebDriverException:
+                except Exception as error:
+                    log_application_error(
+                        error,
+                        "inspect_application_window",
+                        i,
+                        len(job_links),
+                        company,
+                        role,
+                        link,
+                    )
                     continue
 
             if job_window in driver.window_handles:
@@ -930,8 +1034,10 @@ def apply_to_jobs(driver, job_links, search_window, already_applied=0):
 
             application_window = internal_windows[-1] if internal_windows else None
             if application_window:
+                stage = "answering_application_questions"
                 driver.switch_to.window(application_window)
                 answer_application_questions(driver, known_answers)
+                stage = "checking_application_form"
                 check_naukri_request_error(driver)
 
                 try:
@@ -945,6 +1051,7 @@ def apply_to_jobs(driver, job_links, search_window, already_applied=0):
                     pass
 
                 if not quota_expired:
+                    stage = "filling_application_form"
                     try:
                         driver.find_element(By.XPATH, "//input[@id='CUSTOM-FIRSTNAME']")
                         firstname_el = driver.find_element(By.ID, 'CUSTOM-FIRSTNAME')
@@ -973,31 +1080,62 @@ def apply_to_jobs(driver, job_links, search_window, already_applied=0):
 
                 check_naukri_request_error(driver)
 
+            stage = "recording_application_result"
             applied += 1
             applied_list['passed'].append(link)
             record_applied_job(company, role, link)
             applied_jobs.add(job_key)
             logger.info(f"  ✓ Apply flow completed. Total: {already_applied + applied}")
-        except NaukriRequestError:
+        except NaukriRequestError as error:
             request_error_detected = True
             failed += 1
             applied_list['failed'].append(link)
-            logger.exception(
-                "[%s/%s] Naukri displayed a temporary request error. "
-                "Stopping the application run.",
-                i,
-                len(job_links),
-            )
-        except StaleElementReferenceException:
-            failed += 1
-            applied_list['failed'].append(link)
-            logger.exception(
-                "[%s/%s] Page updated while processing %s | %s; "
-                "recording this job as failed and continuing.",
+            error_recorded = log_application_error(
+                error,
+                stage,
                 i,
                 len(job_links),
                 company,
                 role,
+                link,
+            )
+            logger.error(
+                "[%s/%s] Naukri displayed a temporary request error. "
+                "Stopping the application run. %s",
+                i,
+                len(job_links),
+                (
+                    f"Details recorded in {ERROR_LOG_CSV}."
+                    if error_recorded
+                    else f"Could not record details in {ERROR_LOG_CSV}."
+                ),
+            )
+        except Exception as error:
+            failed += 1
+            applied_list['failed'].append(link)
+            error_recorded = log_application_error(
+                error,
+                stage,
+                i,
+                len(job_links),
+                company,
+                role,
+                link,
+            )
+            logger.error(
+                "[%s/%s] %s while %s for %s | %s; recording this job as failed "
+                "and continuing. %s",
+                i,
+                len(job_links),
+                type(error).__name__,
+                stage,
+                company,
+                role,
+                (
+                    f"Details recorded in {ERROR_LOG_CSV}."
+                    if error_recorded
+                    else f"Could not record details in {ERROR_LOG_CSV}."
+                ),
             )
         finally:
             for handle in internal_windows:
@@ -1005,16 +1143,32 @@ def apply_to_jobs(driver, job_links, search_window, already_applied=0):
                     if handle != search_window and handle in driver.window_handles:
                         driver.switch_to.window(handle)
                         driver.close()
-                except WebDriverException:
-                    pass
+                except Exception as error:
+                    log_application_error(
+                        error,
+                        "close_internal_application_tab",
+                        i,
+                        len(job_links),
+                        company,
+                        role,
+                        link,
+                    )
             try:
                 if (job_window and job_window not in external_windows
                         and job_window != search_window and job_window in driver.window_handles):
                     driver.switch_to.window(job_window)
                     driver.close()
                 driver.switch_to.window(search_window)
-            except WebDriverException:
-                pass
+            except Exception as error:
+                log_application_error(
+                    error,
+                    "restore_search_window_after_job",
+                    i,
+                    len(job_links),
+                    company,
+                    role,
+                    link,
+                )
 
         if request_error_detected:
             break
@@ -1147,8 +1301,22 @@ def main():
         save_results(applied_list)
         results_saved = True
 
-    except Exception as e:
-        logger.exception(f"An unexpected error occurred: {e}")
+    except Exception as error:
+        error_recorded = log_application_error(error, "main")
+        logger.error(
+            "Run stopped because of an unexpected error. %s",
+            (
+                f"Details recorded in {ERROR_LOG_CSV}."
+                if error_recorded
+                else f"Could not record details in {ERROR_LOG_CSV}."
+            ),
+        )
+        if not results_saved:
+            try:
+                save_results(applied_list)
+                results_saved = True
+            except Exception as save_error:
+                log_application_error(save_error, "save_results_after_error")
     finally:
         if driver:
             try:
@@ -1162,17 +1330,24 @@ def main():
                 else:
                     logger.info("  Results saved to:    no results file written")
                 logger.info("=" * 50)
+            except Exception as error:
+                log_application_error(error, "print_application_summary")
+
+            try:
                 if request_error_detected:
                     show_retry_prompt()
                 else:
-                    try:
-                        input("Review the summary above. Press Enter to close the browser...")
-                    except EOFError:
-                        logger.warning("No interactive console available; closing the browser.")
-                driver.quit()
-                logger.info("Browser closed.")
-            except Exception:
-                pass
+                    input("Review the summary above. Press Enter to close the browser...")
+            except EOFError:
+                logger.warning("No interactive console available; closing the browser.")
+            except Exception as error:
+                log_application_error(error, "wait_before_browser_close")
+            finally:
+                try:
+                    driver.quit()
+                    logger.info("Browser closed.")
+                except Exception as error:
+                    log_application_error(error, "close_browser")
 
 
 if __name__ == "__main__":

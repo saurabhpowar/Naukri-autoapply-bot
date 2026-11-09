@@ -1,0 +1,876 @@
+timestamp,context,job_index,job_count,company,role,job_url,exception_type,error_message,traceback
+2026-11-09T12:21:12+05:30,clicking_apply_button,17,20,Im24x7 Delta Solutions,React.js + .NET Full Stack Developer,https://www.naukri.com/job-listings-react-js-net-full-stack-developer-im24x7-delta-solutions-llp-new-delhi-5-to-10-years-160426503647,InvalidSessionIdException,"Message: invalid session id: session deleted as the browser has closed the connection
+from disconnected: not connected to DevTools
+  (Session info: MicrosoftEdge=156.0.4314.58); For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#invalidsessionidexception
+Stacktrace:
+Symbols not available. Dumping unresolved backtrace:
+	(No symbol) [0x7ff765a60e65]
+	(No symbol) [0x7ff7659a7ce4]
+	(No symbol) [0x7ff765def91f]
+	(No symbol) [0x7ff765725eba]
+	(No symbol) [0x7ff765741808]
+	(No symbol) [0x7ff7657a6253]
+	(No symbol) [0x7ff7657bdd5f]
+	(No symbol) [0x7ff765775d5c]
+	(No symbol) [0x7ff765774f4a]
+	(No symbol) [0x7ff765775b83]
+	(No symbol) [0x7ff7658b5de1]
+	(No symbol) [0x7ff7658c5a98]
+	(No symbol) [0x7ff765b09b45]
+	(No symbol) [0x7ff765b101c1]
+	(No symbol) [0x7ff7659b3dbc]
+	(No symbol) [0x7ff7659ae5d4]
+	(No symbol) [0x7ff7659ae6fa]
+	(No symbol) [0x7ff76599fb08]
+	(No symbol) [0x7ffc3ffd7374]
+	(No symbol) [0x7ffc41d9cc91]
+","Traceback (most recent call last):
+  File ""i:\Auto_job_applier_Naukri-main\Naukri-autoapply-bot\Naukri-Edge.py"", line 997, in apply_to_jobs
+    if not click_apply_button(driver, link):
+           ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^
+  File ""i:\Auto_job_applier_Naukri-main\Naukri-autoapply-bot\Naukri-Edge.py"", line 403, in click_apply_button
+    check_naukri_request_error(driver)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^
+  File ""i:\Auto_job_applier_Naukri-main\Naukri-autoapply-bot\Naukri-Edge.py"", line 163, in check_naukri_request_error
+    page_source = re.sub(r""\s+"", "" "", driver.page_source).casefold()
+                                      ^^^^^^^^^^^^^^^^^^
+  File ""I:\Auto_job_applier_Naukri-main\Naukri-autoapply-bot\.venv\Lib\site-packages\selenium\webdriver\remote\webdriver.py"", line 646, in page_source
+    return self.execute(Command.GET_PAGE_SOURCE)[""value""]
+           ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File ""I:\Auto_job_applier_Naukri-main\Naukri-autoapply-bot\.venv\Lib\site-packages\selenium\webdriver\remote\webdriver.py"", line 506, in execute
+    self.error_handler.check_response(response)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File ""I:\Auto_job_applier_Naukri-main\Naukri-autoapply-bot\.venv\Lib\site-packages\selenium\webdriver\remote\errorhandler.py"", line 232, in check_response
+    raise exception_class(message, screen, stacktrace)
+selenium.common.exceptions.InvalidSessionIdException: Message: invalid session id: session deleted as the browser has closed the connection
+from disconnected: not connected to DevTools
+  (Session info: MicrosoftEdge=156.0.4314.58); For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#invalidsessionidexception
+Stacktrace:
+Symbols not available. Dumping unresolved backtrace:
+	(No symbol) [0x7ff765a60e65]
+	(No symbol) [0x7ff7659a7ce4]
+	(No symbol) [0x7ff765def91f]
+	(No symbol) [0x7ff765725eba]
+	(No symbol) [0x7ff765741808]
+	(No symbol) [0x7ff7657a6253]
+	(No symbol) [0x7ff7657bdd5f]
+	(No symbol) [0x7ff765775d5c]
+	(No symbol) [0x7ff765774f4a]
+	(No symbol) [0x7ff765775b83]
+	(No symbol) [0x7ff7658b5de1]
+	(No symbol) [0x7ff7658c5a98]
+	(No symbol) [0x7ff765b09b45]
+	(No symbol) [0x7ff765b101c1]
+	(No symbol) [0x7ff7659b3dbc]
+	(No symbol) [0x7ff7659ae5d4]
+	(No symbol) [0x7ff7659ae6fa]
+	(No symbol) [0x7ff76599fb08]
+	(No symbol) [0x7ffc3ffd7374]
+	(No symbol) [0x7ffc41d9cc91]
+
+"
+2026-11-09T12:21:13+05:30,restore_search_window_after_job,17,20,Im24x7 Delta Solutions,React.js + .NET Full Stack Developer,https://www.naukri.com/job-listings-react-js-net-full-stack-developer-im24x7-delta-solutions-llp-new-delhi-5-to-10-years-160426503647,InvalidSessionIdException,"Message: invalid session id; For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#invalidsessionidexception
+Stacktrace:
+Symbols not available. Dumping unresolved backtrace:
+	(No symbol) [0x7ff765a60e65]
+	(No symbol) [0x7ff7659a7ce4]
+	(No symbol) [0x7ff765734593]
+	(No symbol) [0x7ff765774705]
+	(No symbol) [0x7ff7657a1002]
+	(No symbol) [0x7ff76572bfb5]
+	(No symbol) [0x7ff76579d6d7]
+	(No symbol) [0x7ff76579cf22]
+	(No symbol) [0x7ff76570c03b]
+	(No symbol) [0x7ff76570c642]
+	(No symbol) [0x7ff76570cb35]
+	(No symbol) [0x7ff7658b5de1]
+	(No symbol) [0x7ff7658c5a98]
+	(No symbol) [0x7ff765b09b45]
+	(No symbol) [0x7ff765b101c1]
+	(No symbol) [0x7ff7659b3dbc]
+	(No symbol) [0x7ff76570bcfe]
+	(No symbol) [0x7ff765be8eaf]
+	(No symbol) [0x7ffc3ffd7374]
+	(No symbol) [0x7ffc41d9cc91]
+","Traceback (most recent call last):
+  File ""i:\Auto_job_applier_Naukri-main\Naukri-autoapply-bot\Naukri-Edge.py"", line 1158, in apply_to_jobs
+    and job_window != search_window and job_window in driver.window_handles):
+                                                      ^^^^^^^^^^^^^^^^^^^^^
+  File ""I:\Auto_job_applier_Naukri-main\Naukri-autoapply-bot\.venv\Lib\site-packages\selenium\webdriver\remote\webdriver.py"", line 677, in window_handles
+    return self.execute(Command.W3C_GET_WINDOW_HANDLES)[""value""]
+           ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File ""I:\Auto_job_applier_Naukri-main\Naukri-autoapply-bot\.venv\Lib\site-packages\selenium\webdriver\remote\webdriver.py"", line 506, in execute
+    self.error_handler.check_response(response)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File ""I:\Auto_job_applier_Naukri-main\Naukri-autoapply-bot\.venv\Lib\site-packages\selenium\webdriver\remote\errorhandler.py"", line 232, in check_response
+    raise exception_class(message, screen, stacktrace)
+selenium.common.exceptions.InvalidSessionIdException: Message: invalid session id; For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#invalidsessionidexception
+Stacktrace:
+Symbols not available. Dumping unresolved backtrace:
+	(No symbol) [0x7ff765a60e65]
+	(No symbol) [0x7ff7659a7ce4]
+	(No symbol) [0x7ff765734593]
+	(No symbol) [0x7ff765774705]
+	(No symbol) [0x7ff7657a1002]
+	(No symbol) [0x7ff76572bfb5]
+	(No symbol) [0x7ff76579d6d7]
+	(No symbol) [0x7ff76579cf22]
+	(No symbol) [0x7ff76570c03b]
+	(No symbol) [0x7ff76570c642]
+	(No symbol) [0x7ff76570cb35]
+	(No symbol) [0x7ff7658b5de1]
+	(No symbol) [0x7ff7658c5a98]
+	(No symbol) [0x7ff765b09b45]
+	(No symbol) [0x7ff765b101c1]
+	(No symbol) [0x7ff7659b3dbc]
+	(No symbol) [0x7ff76570bcfe]
+	(No symbol) [0x7ff765be8eaf]
+	(No symbol) [0x7ffc3ffd7374]
+	(No symbol) [0x7ffc41d9cc91]
+
+"
+2026-11-09T12:32:12+05:30,clicking_apply_button,4,20,IDESLABS,"Full stack developer - Angular/C#,.Net.",https://www.naukri.com/job-listings-full-stack-developer-angular-c-net-ideslabs-private-limited-bengaluru-4-to-6-years-061223501986,AttributeError,'NoneType' object has no attribute 'is_displayed',"Traceback (most recent call last):
+  File ""i:\Auto_job_applier_Naukri-main\Naukri-autoapply-bot\Naukri-Edge.py"", line 997, in apply_to_jobs
+    if not click_apply_button(driver, link):
+           ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^
+  File ""i:\Auto_job_applier_Naukri-main\Naukri-autoapply-bot\Naukri-Edge.py"", line 417, in click_apply_button
+    apply_btn = WebDriverWait(driver, 3).until(
+        EC.element_to_be_clickable((by, selector))
+    )
+  File ""I:\Auto_job_applier_Naukri-main\Naukri-autoapply-bot\.venv\Lib\site-packages\selenium\webdriver\support\wait.py"", line 112, in until
+    value = method(self._driver)
+  File ""I:\Auto_job_applier_Naukri-main\Naukri-autoapply-bot\.venv\Lib\site-packages\selenium\webdriver\support\expected_conditions.py"", line 519, in _predicate
+    element = visibility_of(target)(driver)
+  File ""I:\Auto_job_applier_Naukri-main\Naukri-autoapply-bot\.venv\Lib\site-packages\selenium\webdriver\support\expected_conditions.py"", line 212, in _predicate
+    return _element_if_visible(element)
+  File ""I:\Auto_job_applier_Naukri-main\Naukri-autoapply-bot\.venv\Lib\site-packages\selenium\webdriver\support\expected_conditions.py"", line 227, in _element_if_visible
+    return element if element.is_displayed() == visibility else False
+                      ^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'NoneType' object has no attribute 'is_displayed'
+"
+2026-11-09T12:32:12+05:30,restore_search_window_after_job,4,20,IDESLABS,"Full stack developer - Angular/C#,.Net.",https://www.naukri.com/job-listings-full-stack-developer-angular-c-net-ideslabs-private-limited-bengaluru-4-to-6-years-061223501986,InvalidSessionIdException,"Message: invalid session id: session deleted as the browser has closed the connection
+from disconnected: not connected to DevTools
+  (Session info: MicrosoftEdge=156.0.4314.58); For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#invalidsessionidexception
+Stacktrace:
+Symbols not available. Dumping unresolved backtrace:
+	(No symbol) [0x7ff673090e65]
+	(No symbol) [0x7ff672fd7ce4]
+	(No symbol) [0x7ff67341f91f]
+	(No symbol) [0x7ff672d5473b]
+	(No symbol) [0x7ff672d5594f]
+	(No symbol) [0x7ff672d64b8b]
+	(No symbol) [0x7ff672d46cd1]
+	(No symbol) [0x7ff672ddf709]
+	(No symbol) [0x7ff672da5d5c]
+	(No symbol) [0x7ff672da4f4a]
+	(No symbol) [0x7ff672da5b83]
+	(No symbol) [0x7ff672ee5de1]
+	(No symbol) [0x7ff672ef5a98]
+	(No symbol) [0x7ff673139b45]
+	(No symbol) [0x7ff6731401c1]
+	(No symbol) [0x7ff672fe3dbc]
+	(No symbol) [0x7ff672fde5d4]
+	(No symbol) [0x7ff672fde6fa]
+	(No symbol) [0x7ff672fcfb08]
+	(No symbol) [0x7ffc3ffd7374]
+	(No symbol) [0x7ffc41d9cc91]
+","Traceback (most recent call last):
+  File ""i:\Auto_job_applier_Naukri-main\Naukri-autoapply-bot\Naukri-Edge.py"", line 1158, in apply_to_jobs
+    and job_window != search_window and job_window in driver.window_handles):
+                                                      ^^^^^^^^^^^^^^^^^^^^^
+  File ""I:\Auto_job_applier_Naukri-main\Naukri-autoapply-bot\.venv\Lib\site-packages\selenium\webdriver\remote\webdriver.py"", line 677, in window_handles
+    return self.execute(Command.W3C_GET_WINDOW_HANDLES)[""value""]
+           ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File ""I:\Auto_job_applier_Naukri-main\Naukri-autoapply-bot\.venv\Lib\site-packages\selenium\webdriver\remote\webdriver.py"", line 506, in execute
+    self.error_handler.check_response(response)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File ""I:\Auto_job_applier_Naukri-main\Naukri-autoapply-bot\.venv\Lib\site-packages\selenium\webdriver\remote\errorhandler.py"", line 232, in check_response
+    raise exception_class(message, screen, stacktrace)
+selenium.common.exceptions.InvalidSessionIdException: Message: invalid session id: session deleted as the browser has closed the connection
+from disconnected: not connected to DevTools
+  (Session info: MicrosoftEdge=156.0.4314.58); For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#invalidsessionidexception
+Stacktrace:
+Symbols not available. Dumping unresolved backtrace:
+	(No symbol) [0x7ff673090e65]
+	(No symbol) [0x7ff672fd7ce4]
+	(No symbol) [0x7ff67341f91f]
+	(No symbol) [0x7ff672d5473b]
+	(No symbol) [0x7ff672d5594f]
+	(No symbol) [0x7ff672d64b8b]
+	(No symbol) [0x7ff672d46cd1]
+	(No symbol) [0x7ff672ddf709]
+	(No symbol) [0x7ff672da5d5c]
+	(No symbol) [0x7ff672da4f4a]
+	(No symbol) [0x7ff672da5b83]
+	(No symbol) [0x7ff672ee5de1]
+	(No symbol) [0x7ff672ef5a98]
+	(No symbol) [0x7ff673139b45]
+	(No symbol) [0x7ff6731401c1]
+	(No symbol) [0x7ff672fe3dbc]
+	(No symbol) [0x7ff672fde5d4]
+	(No symbol) [0x7ff672fde6fa]
+	(No symbol) [0x7ff672fcfb08]
+	(No symbol) [0x7ffc3ffd7374]
+	(No symbol) [0x7ffc41d9cc91]
+
+"
+2026-11-09T12:32:13+05:30,opening_job_page,5,20,Loginix Technolabs,Full-Stack Developer (Angular + .Net),https://www.naukri.com/job-listings-full-stack-developer-angular-net-loginix-technolabs-ahmedabad-3-to-8-years-060525502652,InvalidSessionIdException,"Message: invalid session id; For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#invalidsessionidexception
+Stacktrace:
+Symbols not available. Dumping unresolved backtrace:
+	(No symbol) [0x7ff673090e65]
+	(No symbol) [0x7ff672fd7ce4]
+	(No symbol) [0x7ff672d64593]
+	(No symbol) [0x7ff672da4705]
+	(No symbol) [0x7ff672dd1002]
+	(No symbol) [0x7ff672d5bfb5]
+	(No symbol) [0x7ff672dcd6d7]
+	(No symbol) [0x7ff672dccf22]
+	(No symbol) [0x7ff672d3c03b]
+	(No symbol) [0x7ff672d3c642]
+	(No symbol) [0x7ff672d3cb35]
+	(No symbol) [0x7ff672ee5de1]
+	(No symbol) [0x7ff672ef5a98]
+	(No symbol) [0x7ff673139b45]
+	(No symbol) [0x7ff6731401c1]
+	(No symbol) [0x7ff672fe3dbc]
+	(No symbol) [0x7ff672d3bcfe]
+	(No symbol) [0x7ff673218eaf]
+	(No symbol) [0x7ffc3ffd7374]
+	(No symbol) [0x7ffc41d9cc91]
+","Traceback (most recent call last):
+  File ""i:\Auto_job_applier_Naukri-main\Naukri-autoapply-bot\Naukri-Edge.py"", line 943, in apply_to_jobs
+    driver.switch_to.new_window('tab')
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File ""I:\Auto_job_applier_Naukri-main\Naukri-autoapply-bot\.venv\Lib\site-packages\selenium\webdriver\remote\switch_to.py"", line 100, in new_window
+    value = self._driver.execute(Command.NEW_WINDOW, {""type"": type_hint})[""value""]
+            ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File ""I:\Auto_job_applier_Naukri-main\Naukri-autoapply-bot\.venv\Lib\site-packages\selenium\webdriver\remote\webdriver.py"", line 506, in execute
+    self.error_handler.check_response(response)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File ""I:\Auto_job_applier_Naukri-main\Naukri-autoapply-bot\.venv\Lib\site-packages\selenium\webdriver\remote\errorhandler.py"", line 232, in check_response
+    raise exception_class(message, screen, stacktrace)
+selenium.common.exceptions.InvalidSessionIdException: Message: invalid session id; For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#invalidsessionidexception
+Stacktrace:
+Symbols not available. Dumping unresolved backtrace:
+	(No symbol) [0x7ff673090e65]
+	(No symbol) [0x7ff672fd7ce4]
+	(No symbol) [0x7ff672d64593]
+	(No symbol) [0x7ff672da4705]
+	(No symbol) [0x7ff672dd1002]
+	(No symbol) [0x7ff672d5bfb5]
+	(No symbol) [0x7ff672dcd6d7]
+	(No symbol) [0x7ff672dccf22]
+	(No symbol) [0x7ff672d3c03b]
+	(No symbol) [0x7ff672d3c642]
+	(No symbol) [0x7ff672d3cb35]
+	(No symbol) [0x7ff672ee5de1]
+	(No symbol) [0x7ff672ef5a98]
+	(No symbol) [0x7ff673139b45]
+	(No symbol) [0x7ff6731401c1]
+	(No symbol) [0x7ff672fe3dbc]
+	(No symbol) [0x7ff672d3bcfe]
+	(No symbol) [0x7ff673218eaf]
+	(No symbol) [0x7ffc3ffd7374]
+	(No symbol) [0x7ffc41d9cc91]
+
+"
+2026-11-09T12:32:14+05:30,restore_search_window,5,20,Loginix Technolabs,Full-Stack Developer (Angular + .Net),https://www.naukri.com/job-listings-full-stack-developer-angular-net-loginix-technolabs-ahmedabad-3-to-8-years-060525502652,InvalidSessionIdException,"Message: invalid session id; For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#invalidsessionidexception
+Stacktrace:
+Symbols not available. Dumping unresolved backtrace:
+	(No symbol) [0x7ff673090e65]
+	(No symbol) [0x7ff672fd7ce4]
+	(No symbol) [0x7ff672d64593]
+	(No symbol) [0x7ff672da4705]
+	(No symbol) [0x7ff672dd1002]
+	(No symbol) [0x7ff672d5bfb5]
+	(No symbol) [0x7ff672dcd6d7]
+	(No symbol) [0x7ff672dccf22]
+	(No symbol) [0x7ff672d3c03b]
+	(No symbol) [0x7ff672d3c642]
+	(No symbol) [0x7ff672d3cb35]
+	(No symbol) [0x7ff672ee5de1]
+	(No symbol) [0x7ff672ef5a98]
+	(No symbol) [0x7ff673139b45]
+	(No symbol) [0x7ff6731401c1]
+	(No symbol) [0x7ff672fe3dbc]
+	(No symbol) [0x7ff672d3bcfe]
+	(No symbol) [0x7ff673218eaf]
+	(No symbol) [0x7ffc3ffd7374]
+	(No symbol) [0x7ffc41d9cc91]
+","Traceback (most recent call last):
+  File ""i:\Auto_job_applier_Naukri-main\Naukri-autoapply-bot\Naukri-Edge.py"", line 943, in apply_to_jobs
+    driver.switch_to.new_window('tab')
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File ""I:\Auto_job_applier_Naukri-main\Naukri-autoapply-bot\.venv\Lib\site-packages\selenium\webdriver\remote\switch_to.py"", line 100, in new_window
+    value = self._driver.execute(Command.NEW_WINDOW, {""type"": type_hint})[""value""]
+            ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File ""I:\Auto_job_applier_Naukri-main\Naukri-autoapply-bot\.venv\Lib\site-packages\selenium\webdriver\remote\webdriver.py"", line 506, in execute
+    self.error_handler.check_response(response)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File ""I:\Auto_job_applier_Naukri-main\Naukri-autoapply-bot\.venv\Lib\site-packages\selenium\webdriver\remote\errorhandler.py"", line 232, in check_response
+    raise exception_class(message, screen, stacktrace)
+selenium.common.exceptions.InvalidSessionIdException: Message: invalid session id; For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#invalidsessionidexception
+Stacktrace:
+Symbols not available. Dumping unresolved backtrace:
+	(No symbol) [0x7ff673090e65]
+	(No symbol) [0x7ff672fd7ce4]
+	(No symbol) [0x7ff672d64593]
+	(No symbol) [0x7ff672da4705]
+	(No symbol) [0x7ff672dd1002]
+	(No symbol) [0x7ff672d5bfb5]
+	(No symbol) [0x7ff672dcd6d7]
+	(No symbol) [0x7ff672dccf22]
+	(No symbol) [0x7ff672d3c03b]
+	(No symbol) [0x7ff672d3c642]
+	(No symbol) [0x7ff672d3cb35]
+	(No symbol) [0x7ff672ee5de1]
+	(No symbol) [0x7ff672ef5a98]
+	(No symbol) [0x7ff673139b45]
+	(No symbol) [0x7ff6731401c1]
+	(No symbol) [0x7ff672fe3dbc]
+	(No symbol) [0x7ff672d3bcfe]
+	(No symbol) [0x7ff673218eaf]
+	(No symbol) [0x7ffc3ffd7374]
+	(No symbol) [0x7ffc41d9cc91]
+
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File ""i:\Auto_job_applier_Naukri-main\Naukri-autoapply-bot\Naukri-Edge.py"", line 979, in apply_to_jobs
+    driver.switch_to.window(search_window)
+    ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File ""I:\Auto_job_applier_Naukri-main\Naukri-autoapply-bot\.venv\Lib\site-packages\selenium\webdriver\remote\switch_to.py"", line 122, in window
+    self._w3c_window(window_name)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File ""I:\Auto_job_applier_Naukri-main\Naukri-autoapply-bot\.venv\Lib\site-packages\selenium\webdriver\remote\switch_to.py"", line 130, in _w3c_window
+    send_handle(window_name)
+    ~~~~~~~~~~~^^^^^^^^^^^^^
+  File ""I:\Auto_job_applier_Naukri-main\Naukri-autoapply-bot\.venv\Lib\site-packages\selenium\webdriver\remote\switch_to.py"", line 126, in send_handle
+    self._driver.execute(Command.SWITCH_TO_WINDOW, {""handle"": h})
+    ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File ""I:\Auto_job_applier_Naukri-main\Naukri-autoapply-bot\.venv\Lib\site-packages\selenium\webdriver\remote\webdriver.py"", line 506, in execute
+    self.error_handler.check_response(response)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File ""I:\Auto_job_applier_Naukri-main\Naukri-autoapply-bot\.venv\Lib\site-packages\selenium\webdriver\remote\errorhandler.py"", line 232, in check_response
+    raise exception_class(message, screen, stacktrace)
+selenium.common.exceptions.InvalidSessionIdException: Message: invalid session id; For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#invalidsessionidexception
+Stacktrace:
+Symbols not available. Dumping unresolved backtrace:
+	(No symbol) [0x7ff673090e65]
+	(No symbol) [0x7ff672fd7ce4]
+	(No symbol) [0x7ff672d64593]
+	(No symbol) [0x7ff672da4705]
+	(No symbol) [0x7ff672dd1002]
+	(No symbol) [0x7ff672d5bfb5]
+	(No symbol) [0x7ff672dcd6d7]
+	(No symbol) [0x7ff672dccf22]
+	(No symbol) [0x7ff672d3c03b]
+	(No symbol) [0x7ff672d3c642]
+	(No symbol) [0x7ff672d3cb35]
+	(No symbol) [0x7ff672ee5de1]
+	(No symbol) [0x7ff672ef5a98]
+	(No symbol) [0x7ff673139b45]
+	(No symbol) [0x7ff6731401c1]
+	(No symbol) [0x7ff672fe3dbc]
+	(No symbol) [0x7ff672d3bcfe]
+	(No symbol) [0x7ff673218eaf]
+	(No symbol) [0x7ffc3ffd7374]
+	(No symbol) [0x7ffc41d9cc91]
+
+"
+2026-11-09T12:32:14+05:30,opening_job_page,8,20,Vartopia,"Full Stack Developer (.NET, Angular)",https://www.naukri.com/job-listings-full-stack-developer-net-angular-vartopia-mohali-5-to-8-years-090725503238,InvalidSessionIdException,"Message: invalid session id; For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#invalidsessionidexception
+Stacktrace:
+Symbols not available. Dumping unresolved backtrace:
+	(No symbol) [0x7ff673090e65]
+	(No symbol) [0x7ff672fd7ce4]
+	(No symbol) [0x7ff672d64593]
+	(No symbol) [0x7ff672da4705]
+	(No symbol) [0x7ff672dd1002]
+	(No symbol) [0x7ff672d5bfb5]
+	(No symbol) [0x7ff672dcd6d7]
+	(No symbol) [0x7ff672dccf22]
+	(No symbol) [0x7ff672d3c03b]
+	(No symbol) [0x7ff672d3c642]
+	(No symbol) [0x7ff672d3cb35]
+	(No symbol) [0x7ff672ee5de1]
+	(No symbol) [0x7ff672ef5a98]
+	(No symbol) [0x7ff673139b45]
+	(No symbol) [0x7ff6731401c1]
+	(No symbol) [0x7ff672fe3dbc]
+	(No symbol) [0x7ff672d3bcfe]
+	(No symbol) [0x7ff673218eaf]
+	(No symbol) [0x7ffc3ffd7374]
+	(No symbol) [0x7ffc41d9cc91]
+","Traceback (most recent call last):
+  File ""i:\Auto_job_applier_Naukri-main\Naukri-autoapply-bot\Naukri-Edge.py"", line 943, in apply_to_jobs
+    driver.switch_to.new_window('tab')
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File ""I:\Auto_job_applier_Naukri-main\Naukri-autoapply-bot\.venv\Lib\site-packages\selenium\webdriver\remote\switch_to.py"", line 100, in new_window
+    value = self._driver.execute(Command.NEW_WINDOW, {""type"": type_hint})[""value""]
+            ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File ""I:\Auto_job_applier_Naukri-main\Naukri-autoapply-bot\.venv\Lib\site-packages\selenium\webdriver\remote\webdriver.py"", line 506, in execute
+    self.error_handler.check_response(response)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File ""I:\Auto_job_applier_Naukri-main\Naukri-autoapply-bot\.venv\Lib\site-packages\selenium\webdriver\remote\errorhandler.py"", line 232, in check_response
+    raise exception_class(message, screen, stacktrace)
+selenium.common.exceptions.InvalidSessionIdException: Message: invalid session id; For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#invalidsessionidexception
+Stacktrace:
+Symbols not available. Dumping unresolved backtrace:
+	(No symbol) [0x7ff673090e65]
+	(No symbol) [0x7ff672fd7ce4]
+	(No symbol) [0x7ff672d64593]
+	(No symbol) [0x7ff672da4705]
+	(No symbol) [0x7ff672dd1002]
+	(No symbol) [0x7ff672d5bfb5]
+	(No symbol) [0x7ff672dcd6d7]
+	(No symbol) [0x7ff672dccf22]
+	(No symbol) [0x7ff672d3c03b]
+	(No symbol) [0x7ff672d3c642]
+	(No symbol) [0x7ff672d3cb35]
+	(No symbol) [0x7ff672ee5de1]
+	(No symbol) [0x7ff672ef5a98]
+	(No symbol) [0x7ff673139b45]
+	(No symbol) [0x7ff6731401c1]
+	(No symbol) [0x7ff672fe3dbc]
+	(No symbol) [0x7ff672d3bcfe]
+	(No symbol) [0x7ff673218eaf]
+	(No symbol) [0x7ffc3ffd7374]
+	(No symbol) [0x7ffc41d9cc91]
+
+"
+2026-11-09T12:32:14+05:30,restore_search_window,8,20,Vartopia,"Full Stack Developer (.NET, Angular)",https://www.naukri.com/job-listings-full-stack-developer-net-angular-vartopia-mohali-5-to-8-years-090725503238,InvalidSessionIdException,"Message: invalid session id; For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#invalidsessionidexception
+Stacktrace:
+Symbols not available. Dumping unresolved backtrace:
+	(No symbol) [0x7ff673090e65]
+	(No symbol) [0x7ff672fd7ce4]
+	(No symbol) [0x7ff672d64593]
+	(No symbol) [0x7ff672da4705]
+	(No symbol) [0x7ff672dd1002]
+	(No symbol) [0x7ff672d5bfb5]
+	(No symbol) [0x7ff672dcd6d7]
+	(No symbol) [0x7ff672dccf22]
+	(No symbol) [0x7ff672d3c03b]
+	(No symbol) [0x7ff672d3c642]
+	(No symbol) [0x7ff672d3cb35]
+	(No symbol) [0x7ff672ee5de1]
+	(No symbol) [0x7ff672ef5a98]
+	(No symbol) [0x7ff673139b45]
+	(No symbol) [0x7ff6731401c1]
+	(No symbol) [0x7ff672fe3dbc]
+	(No symbol) [0x7ff672d3bcfe]
+	(No symbol) [0x7ff673218eaf]
+	(No symbol) [0x7ffc3ffd7374]
+	(No symbol) [0x7ffc41d9cc91]
+","Traceback (most recent call last):
+  File ""i:\Auto_job_applier_Naukri-main\Naukri-autoapply-bot\Naukri-Edge.py"", line 943, in apply_to_jobs
+    driver.switch_to.new_window('tab')
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File ""I:\Auto_job_applier_Naukri-main\Naukri-autoapply-bot\.venv\Lib\site-packages\selenium\webdriver\remote\switch_to.py"", line 100, in new_window
+    value = self._driver.execute(Command.NEW_WINDOW, {""type"": type_hint})[""value""]
+            ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File ""I:\Auto_job_applier_Naukri-main\Naukri-autoapply-bot\.venv\Lib\site-packages\selenium\webdriver\remote\webdriver.py"", line 506, in execute
+    self.error_handler.check_response(response)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File ""I:\Auto_job_applier_Naukri-main\Naukri-autoapply-bot\.venv\Lib\site-packages\selenium\webdriver\remote\errorhandler.py"", line 232, in check_response
+    raise exception_class(message, screen, stacktrace)
+selenium.common.exceptions.InvalidSessionIdException: Message: invalid session id; For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#invalidsessionidexception
+Stacktrace:
+Symbols not available. Dumping unresolved backtrace:
+	(No symbol) [0x7ff673090e65]
+	(No symbol) [0x7ff672fd7ce4]
+	(No symbol) [0x7ff672d64593]
+	(No symbol) [0x7ff672da4705]
+	(No symbol) [0x7ff672dd1002]
+	(No symbol) [0x7ff672d5bfb5]
+	(No symbol) [0x7ff672dcd6d7]
+	(No symbol) [0x7ff672dccf22]
+	(No symbol) [0x7ff672d3c03b]
+	(No symbol) [0x7ff672d3c642]
+	(No symbol) [0x7ff672d3cb35]
+	(No symbol) [0x7ff672ee5de1]
+	(No symbol) [0x7ff672ef5a98]
+	(No symbol) [0x7ff673139b45]
+	(No symbol) [0x7ff6731401c1]
+	(No symbol) [0x7ff672fe3dbc]
+	(No symbol) [0x7ff672d3bcfe]
+	(No symbol) [0x7ff673218eaf]
+	(No symbol) [0x7ffc3ffd7374]
+	(No symbol) [0x7ffc41d9cc91]
+
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File ""i:\Auto_job_applier_Naukri-main\Naukri-autoapply-bot\Naukri-Edge.py"", line 979, in apply_to_jobs
+    driver.switch_to.window(search_window)
+    ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File ""I:\Auto_job_applier_Naukri-main\Naukri-autoapply-bot\.venv\Lib\site-packages\selenium\webdriver\remote\switch_to.py"", line 122, in window
+    self._w3c_window(window_name)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File ""I:\Auto_job_applier_Naukri-main\Naukri-autoapply-bot\.venv\Lib\site-packages\selenium\webdriver\remote\switch_to.py"", line 130, in _w3c_window
+    send_handle(window_name)
+    ~~~~~~~~~~~^^^^^^^^^^^^^
+  File ""I:\Auto_job_applier_Naukri-main\Naukri-autoapply-bot\.venv\Lib\site-packages\selenium\webdriver\remote\switch_to.py"", line 126, in send_handle
+    self._driver.execute(Command.SWITCH_TO_WINDOW, {""handle"": h})
+    ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File ""I:\Auto_job_applier_Naukri-main\Naukri-autoapply-bot\.venv\Lib\site-packages\selenium\webdriver\remote\webdriver.py"", line 506, in execute
+    self.error_handler.check_response(response)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File ""I:\Auto_job_applier_Naukri-main\Naukri-autoapply-bot\.venv\Lib\site-packages\selenium\webdriver\remote\errorhandler.py"", line 232, in check_response
+    raise exception_class(message, screen, stacktrace)
+selenium.common.exceptions.InvalidSessionIdException: Message: invalid session id; For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#invalidsessionidexception
+Stacktrace:
+Symbols not available. Dumping unresolved backtrace:
+	(No symbol) [0x7ff673090e65]
+	(No symbol) [0x7ff672fd7ce4]
+	(No symbol) [0x7ff672d64593]
+	(No symbol) [0x7ff672da4705]
+	(No symbol) [0x7ff672dd1002]
+	(No symbol) [0x7ff672d5bfb5]
+	(No symbol) [0x7ff672dcd6d7]
+	(No symbol) [0x7ff672dccf22]
+	(No symbol) [0x7ff672d3c03b]
+	(No symbol) [0x7ff672d3c642]
+	(No symbol) [0x7ff672d3cb35]
+	(No symbol) [0x7ff672ee5de1]
+	(No symbol) [0x7ff672ef5a98]
+	(No symbol) [0x7ff673139b45]
+	(No symbol) [0x7ff6731401c1]
+	(No symbol) [0x7ff672fe3dbc]
+	(No symbol) [0x7ff672d3bcfe]
+	(No symbol) [0x7ff673218eaf]
+	(No symbol) [0x7ffc3ffd7374]
+	(No symbol) [0x7ffc41d9cc91]
+
+"
+2026-11-09T12:32:14+05:30,opening_job_page,14,20,Geostat Informatics,Full Stack .NET Developer,https://www.naukri.com/job-listings-full-stack-net-developer-geostat-informatics-noida-5-to-10-years-110625501246,InvalidSessionIdException,"Message: invalid session id; For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#invalidsessionidexception
+Stacktrace:
+Symbols not available. Dumping unresolved backtrace:
+	(No symbol) [0x7ff673090e65]
+	(No symbol) [0x7ff672fd7ce4]
+	(No symbol) [0x7ff672d64593]
+	(No symbol) [0x7ff672da4705]
+	(No symbol) [0x7ff672dd1002]
+	(No symbol) [0x7ff672d5bfb5]
+	(No symbol) [0x7ff672dcd6d7]
+	(No symbol) [0x7ff672dccf22]
+	(No symbol) [0x7ff672d3c03b]
+	(No symbol) [0x7ff672d3c642]
+	(No symbol) [0x7ff672d3cb35]
+	(No symbol) [0x7ff672ee5de1]
+	(No symbol) [0x7ff672ef5a98]
+	(No symbol) [0x7ff673139b45]
+	(No symbol) [0x7ff6731401c1]
+	(No symbol) [0x7ff672fe3dbc]
+	(No symbol) [0x7ff672d3bcfe]
+	(No symbol) [0x7ff673218eaf]
+	(No symbol) [0x7ffc3ffd7374]
+	(No symbol) [0x7ffc41d9cc91]
+","Traceback (most recent call last):
+  File ""i:\Auto_job_applier_Naukri-main\Naukri-autoapply-bot\Naukri-Edge.py"", line 943, in apply_to_jobs
+    driver.switch_to.new_window('tab')
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File ""I:\Auto_job_applier_Naukri-main\Naukri-autoapply-bot\.venv\Lib\site-packages\selenium\webdriver\remote\switch_to.py"", line 100, in new_window
+    value = self._driver.execute(Command.NEW_WINDOW, {""type"": type_hint})[""value""]
+            ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File ""I:\Auto_job_applier_Naukri-main\Naukri-autoapply-bot\.venv\Lib\site-packages\selenium\webdriver\remote\webdriver.py"", line 506, in execute
+    self.error_handler.check_response(response)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File ""I:\Auto_job_applier_Naukri-main\Naukri-autoapply-bot\.venv\Lib\site-packages\selenium\webdriver\remote\errorhandler.py"", line 232, in check_response
+    raise exception_class(message, screen, stacktrace)
+selenium.common.exceptions.InvalidSessionIdException: Message: invalid session id; For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#invalidsessionidexception
+Stacktrace:
+Symbols not available. Dumping unresolved backtrace:
+	(No symbol) [0x7ff673090e65]
+	(No symbol) [0x7ff672fd7ce4]
+	(No symbol) [0x7ff672d64593]
+	(No symbol) [0x7ff672da4705]
+	(No symbol) [0x7ff672dd1002]
+	(No symbol) [0x7ff672d5bfb5]
+	(No symbol) [0x7ff672dcd6d7]
+	(No symbol) [0x7ff672dccf22]
+	(No symbol) [0x7ff672d3c03b]
+	(No symbol) [0x7ff672d3c642]
+	(No symbol) [0x7ff672d3cb35]
+	(No symbol) [0x7ff672ee5de1]
+	(No symbol) [0x7ff672ef5a98]
+	(No symbol) [0x7ff673139b45]
+	(No symbol) [0x7ff6731401c1]
+	(No symbol) [0x7ff672fe3dbc]
+	(No symbol) [0x7ff672d3bcfe]
+	(No symbol) [0x7ff673218eaf]
+	(No symbol) [0x7ffc3ffd7374]
+	(No symbol) [0x7ffc41d9cc91]
+
+"
+2026-11-09T12:32:14+05:30,restore_search_window,14,20,Geostat Informatics,Full Stack .NET Developer,https://www.naukri.com/job-listings-full-stack-net-developer-geostat-informatics-noida-5-to-10-years-110625501246,InvalidSessionIdException,"Message: invalid session id; For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#invalidsessionidexception
+Stacktrace:
+Symbols not available. Dumping unresolved backtrace:
+	(No symbol) [0x7ff673090e65]
+	(No symbol) [0x7ff672fd7ce4]
+	(No symbol) [0x7ff672d64593]
+	(No symbol) [0x7ff672da4705]
+	(No symbol) [0x7ff672dd1002]
+	(No symbol) [0x7ff672d5bfb5]
+	(No symbol) [0x7ff672dcd6d7]
+	(No symbol) [0x7ff672dccf22]
+	(No symbol) [0x7ff672d3c03b]
+	(No symbol) [0x7ff672d3c642]
+	(No symbol) [0x7ff672d3cb35]
+	(No symbol) [0x7ff672ee5de1]
+	(No symbol) [0x7ff672ef5a98]
+	(No symbol) [0x7ff673139b45]
+	(No symbol) [0x7ff6731401c1]
+	(No symbol) [0x7ff672fe3dbc]
+	(No symbol) [0x7ff672d3bcfe]
+	(No symbol) [0x7ff673218eaf]
+	(No symbol) [0x7ffc3ffd7374]
+	(No symbol) [0x7ffc41d9cc91]
+","Traceback (most recent call last):
+  File ""i:\Auto_job_applier_Naukri-main\Naukri-autoapply-bot\Naukri-Edge.py"", line 943, in apply_to_jobs
+    driver.switch_to.new_window('tab')
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File ""I:\Auto_job_applier_Naukri-main\Naukri-autoapply-bot\.venv\Lib\site-packages\selenium\webdriver\remote\switch_to.py"", line 100, in new_window
+    value = self._driver.execute(Command.NEW_WINDOW, {""type"": type_hint})[""value""]
+            ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File ""I:\Auto_job_applier_Naukri-main\Naukri-autoapply-bot\.venv\Lib\site-packages\selenium\webdriver\remote\webdriver.py"", line 506, in execute
+    self.error_handler.check_response(response)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File ""I:\Auto_job_applier_Naukri-main\Naukri-autoapply-bot\.venv\Lib\site-packages\selenium\webdriver\remote\errorhandler.py"", line 232, in check_response
+    raise exception_class(message, screen, stacktrace)
+selenium.common.exceptions.InvalidSessionIdException: Message: invalid session id; For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#invalidsessionidexception
+Stacktrace:
+Symbols not available. Dumping unresolved backtrace:
+	(No symbol) [0x7ff673090e65]
+	(No symbol) [0x7ff672fd7ce4]
+	(No symbol) [0x7ff672d64593]
+	(No symbol) [0x7ff672da4705]
+	(No symbol) [0x7ff672dd1002]
+	(No symbol) [0x7ff672d5bfb5]
+	(No symbol) [0x7ff672dcd6d7]
+	(No symbol) [0x7ff672dccf22]
+	(No symbol) [0x7ff672d3c03b]
+	(No symbol) [0x7ff672d3c642]
+	(No symbol) [0x7ff672d3cb35]
+	(No symbol) [0x7ff672ee5de1]
+	(No symbol) [0x7ff672ef5a98]
+	(No symbol) [0x7ff673139b45]
+	(No symbol) [0x7ff6731401c1]
+	(No symbol) [0x7ff672fe3dbc]
+	(No symbol) [0x7ff672d3bcfe]
+	(No symbol) [0x7ff673218eaf]
+	(No symbol) [0x7ffc3ffd7374]
+	(No symbol) [0x7ffc41d9cc91]
+
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File ""i:\Auto_job_applier_Naukri-main\Naukri-autoapply-bot\Naukri-Edge.py"", line 979, in apply_to_jobs
+    driver.switch_to.window(search_window)
+    ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File ""I:\Auto_job_applier_Naukri-main\Naukri-autoapply-bot\.venv\Lib\site-packages\selenium\webdriver\remote\switch_to.py"", line 122, in window
+    self._w3c_window(window_name)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File ""I:\Auto_job_applier_Naukri-main\Naukri-autoapply-bot\.venv\Lib\site-packages\selenium\webdriver\remote\switch_to.py"", line 130, in _w3c_window
+    send_handle(window_name)
+    ~~~~~~~~~~~^^^^^^^^^^^^^
+  File ""I:\Auto_job_applier_Naukri-main\Naukri-autoapply-bot\.venv\Lib\site-packages\selenium\webdriver\remote\switch_to.py"", line 126, in send_handle
+    self._driver.execute(Command.SWITCH_TO_WINDOW, {""handle"": h})
+    ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File ""I:\Auto_job_applier_Naukri-main\Naukri-autoapply-bot\.venv\Lib\site-packages\selenium\webdriver\remote\webdriver.py"", line 506, in execute
+    self.error_handler.check_response(response)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File ""I:\Auto_job_applier_Naukri-main\Naukri-autoapply-bot\.venv\Lib\site-packages\selenium\webdriver\remote\errorhandler.py"", line 232, in check_response
+    raise exception_class(message, screen, stacktrace)
+selenium.common.exceptions.InvalidSessionIdException: Message: invalid session id; For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#invalidsessionidexception
+Stacktrace:
+Symbols not available. Dumping unresolved backtrace:
+	(No symbol) [0x7ff673090e65]
+	(No symbol) [0x7ff672fd7ce4]
+	(No symbol) [0x7ff672d64593]
+	(No symbol) [0x7ff672da4705]
+	(No symbol) [0x7ff672dd1002]
+	(No symbol) [0x7ff672d5bfb5]
+	(No symbol) [0x7ff672dcd6d7]
+	(No symbol) [0x7ff672dccf22]
+	(No symbol) [0x7ff672d3c03b]
+	(No symbol) [0x7ff672d3c642]
+	(No symbol) [0x7ff672d3cb35]
+	(No symbol) [0x7ff672ee5de1]
+	(No symbol) [0x7ff672ef5a98]
+	(No symbol) [0x7ff673139b45]
+	(No symbol) [0x7ff6731401c1]
+	(No symbol) [0x7ff672fe3dbc]
+	(No symbol) [0x7ff672d3bcfe]
+	(No symbol) [0x7ff673218eaf]
+	(No symbol) [0x7ffc3ffd7374]
+	(No symbol) [0x7ffc41d9cc91]
+
+"
+2026-11-09T12:32:14+05:30,opening_job_page,15,20,Oneroof Technologies Llp,Full Stack Developer .net MVC with Angular,https://www.naukri.com/job-listings-full-stack-developer-net-mvc-with-angular-one-roof-technologies-mumbai-2-to-7-years-071124502344,InvalidSessionIdException,"Message: invalid session id; For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#invalidsessionidexception
+Stacktrace:
+Symbols not available. Dumping unresolved backtrace:
+	(No symbol) [0x7ff673090e65]
+	(No symbol) [0x7ff672fd7ce4]
+	(No symbol) [0x7ff672d64593]
+	(No symbol) [0x7ff672da4705]
+	(No symbol) [0x7ff672dd1002]
+	(No symbol) [0x7ff672d5bfb5]
+	(No symbol) [0x7ff672dcd6d7]
+	(No symbol) [0x7ff672dccf22]
+	(No symbol) [0x7ff672d3c03b]
+	(No symbol) [0x7ff672d3c642]
+	(No symbol) [0x7ff672d3cb35]
+	(No symbol) [0x7ff672ee5de1]
+	(No symbol) [0x7ff672ef5a98]
+	(No symbol) [0x7ff673139b45]
+	(No symbol) [0x7ff6731401c1]
+	(No symbol) [0x7ff672fe3dbc]
+	(No symbol) [0x7ff672d3bcfe]
+	(No symbol) [0x7ff673218eaf]
+	(No symbol) [0x7ffc3ffd7374]
+	(No symbol) [0x7ffc41d9cc91]
+","Traceback (most recent call last):
+  File ""i:\Auto_job_applier_Naukri-main\Naukri-autoapply-bot\Naukri-Edge.py"", line 943, in apply_to_jobs
+    driver.switch_to.new_window('tab')
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File ""I:\Auto_job_applier_Naukri-main\Naukri-autoapply-bot\.venv\Lib\site-packages\selenium\webdriver\remote\switch_to.py"", line 100, in new_window
+    value = self._driver.execute(Command.NEW_WINDOW, {""type"": type_hint})[""value""]
+            ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File ""I:\Auto_job_applier_Naukri-main\Naukri-autoapply-bot\.venv\Lib\site-packages\selenium\webdriver\remote\webdriver.py"", line 506, in execute
+    self.error_handler.check_response(response)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File ""I:\Auto_job_applier_Naukri-main\Naukri-autoapply-bot\.venv\Lib\site-packages\selenium\webdriver\remote\errorhandler.py"", line 232, in check_response
+    raise exception_class(message, screen, stacktrace)
+selenium.common.exceptions.InvalidSessionIdException: Message: invalid session id; For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#invalidsessionidexception
+Stacktrace:
+Symbols not available. Dumping unresolved backtrace:
+	(No symbol) [0x7ff673090e65]
+	(No symbol) [0x7ff672fd7ce4]
+	(No symbol) [0x7ff672d64593]
+	(No symbol) [0x7ff672da4705]
+	(No symbol) [0x7ff672dd1002]
+	(No symbol) [0x7ff672d5bfb5]
+	(No symbol) [0x7ff672dcd6d7]
+	(No symbol) [0x7ff672dccf22]
+	(No symbol) [0x7ff672d3c03b]
+	(No symbol) [0x7ff672d3c642]
+	(No symbol) [0x7ff672d3cb35]
+	(No symbol) [0x7ff672ee5de1]
+	(No symbol) [0x7ff672ef5a98]
+	(No symbol) [0x7ff673139b45]
+	(No symbol) [0x7ff6731401c1]
+	(No symbol) [0x7ff672fe3dbc]
+	(No symbol) [0x7ff672d3bcfe]
+	(No symbol) [0x7ff673218eaf]
+	(No symbol) [0x7ffc3ffd7374]
+	(No symbol) [0x7ffc41d9cc91]
+
+"
+2026-11-09T12:32:14+05:30,restore_search_window,15,20,Oneroof Technologies Llp,Full Stack Developer .net MVC with Angular,https://www.naukri.com/job-listings-full-stack-developer-net-mvc-with-angular-one-roof-technologies-mumbai-2-to-7-years-071124502344,InvalidSessionIdException,"Message: invalid session id; For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#invalidsessionidexception
+Stacktrace:
+Symbols not available. Dumping unresolved backtrace:
+	(No symbol) [0x7ff673090e65]
+	(No symbol) [0x7ff672fd7ce4]
+	(No symbol) [0x7ff672d64593]
+	(No symbol) [0x7ff672da4705]
+	(No symbol) [0x7ff672dd1002]
+	(No symbol) [0x7ff672d5bfb5]
+	(No symbol) [0x7ff672dcd6d7]
+	(No symbol) [0x7ff672dccf22]
+	(No symbol) [0x7ff672d3c03b]
+	(No symbol) [0x7ff672d3c642]
+	(No symbol) [0x7ff672d3cb35]
+	(No symbol) [0x7ff672ee5de1]
+	(No symbol) [0x7ff672ef5a98]
+	(No symbol) [0x7ff673139b45]
+	(No symbol) [0x7ff6731401c1]
+	(No symbol) [0x7ff672fe3dbc]
+	(No symbol) [0x7ff672d3bcfe]
+	(No symbol) [0x7ff673218eaf]
+	(No symbol) [0x7ffc3ffd7374]
+	(No symbol) [0x7ffc41d9cc91]
+","Traceback (most recent call last):
+  File ""i:\Auto_job_applier_Naukri-main\Naukri-autoapply-bot\Naukri-Edge.py"", line 943, in apply_to_jobs
+    driver.switch_to.new_window('tab')
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File ""I:\Auto_job_applier_Naukri-main\Naukri-autoapply-bot\.venv\Lib\site-packages\selenium\webdriver\remote\switch_to.py"", line 100, in new_window
+    value = self._driver.execute(Command.NEW_WINDOW, {""type"": type_hint})[""value""]
+            ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File ""I:\Auto_job_applier_Naukri-main\Naukri-autoapply-bot\.venv\Lib\site-packages\selenium\webdriver\remote\webdriver.py"", line 506, in execute
+    self.error_handler.check_response(response)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File ""I:\Auto_job_applier_Naukri-main\Naukri-autoapply-bot\.venv\Lib\site-packages\selenium\webdriver\remote\errorhandler.py"", line 232, in check_response
+    raise exception_class(message, screen, stacktrace)
+selenium.common.exceptions.InvalidSessionIdException: Message: invalid session id; For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#invalidsessionidexception
+Stacktrace:
+Symbols not available. Dumping unresolved backtrace:
+	(No symbol) [0x7ff673090e65]
+	(No symbol) [0x7ff672fd7ce4]
+	(No symbol) [0x7ff672d64593]
+	(No symbol) [0x7ff672da4705]
+	(No symbol) [0x7ff672dd1002]
+	(No symbol) [0x7ff672d5bfb5]
+	(No symbol) [0x7ff672dcd6d7]
+	(No symbol) [0x7ff672dccf22]
+	(No symbol) [0x7ff672d3c03b]
+	(No symbol) [0x7ff672d3c642]
+	(No symbol) [0x7ff672d3cb35]
+	(No symbol) [0x7ff672ee5de1]
+	(No symbol) [0x7ff672ef5a98]
+	(No symbol) [0x7ff673139b45]
+	(No symbol) [0x7ff6731401c1]
+	(No symbol) [0x7ff672fe3dbc]
+	(No symbol) [0x7ff672d3bcfe]
+	(No symbol) [0x7ff673218eaf]
+	(No symbol) [0x7ffc3ffd7374]
+	(No symbol) [0x7ffc41d9cc91]
+
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File ""i:\Auto_job_applier_Naukri-main\Naukri-autoapply-bot\Naukri-Edge.py"", line 979, in apply_to_jobs
+    driver.switch_to.window(search_window)
+    ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File ""I:\Auto_job_applier_Naukri-main\Naukri-autoapply-bot\.venv\Lib\site-packages\selenium\webdriver\remote\switch_to.py"", line 122, in window
+    self._w3c_window(window_name)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File ""I:\Auto_job_applier_Naukri-main\Naukri-autoapply-bot\.venv\Lib\site-packages\selenium\webdriver\remote\switch_to.py"", line 130, in _w3c_window
+    send_handle(window_name)
+    ~~~~~~~~~~~^^^^^^^^^^^^^
+  File ""I:\Auto_job_applier_Naukri-main\Naukri-autoapply-bot\.venv\Lib\site-packages\selenium\webdriver\remote\switch_to.py"", line 126, in send_handle
+    self._driver.execute(Command.SWITCH_TO_WINDOW, {""handle"": h})
+    ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File ""I:\Auto_job_applier_Naukri-main\Naukri-autoapply-bot\.venv\Lib\site-packages\selenium\webdriver\remote\webdriver.py"", line 506, in execute
+    self.error_handler.check_response(response)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File ""I:\Auto_job_applier_Naukri-main\Naukri-autoapply-bot\.venv\Lib\site-packages\selenium\webdriver\remote\errorhandler.py"", line 232, in check_response
+    raise exception_class(message, screen, stacktrace)
+selenium.common.exceptions.InvalidSessionIdException: Message: invalid session id; For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#invalidsessionidexception
+Stacktrace:
+Symbols not available. Dumping unresolved backtrace:
+	(No symbol) [0x7ff673090e65]
+	(No symbol) [0x7ff672fd7ce4]
+	(No symbol) [0x7ff672d64593]
+	(No symbol) [0x7ff672da4705]
+	(No symbol) [0x7ff672dd1002]
+	(No symbol) [0x7ff672d5bfb5]
+	(No symbol) [0x7ff672dcd6d7]
+	(No symbol) [0x7ff672dccf22]
+	(No symbol) [0x7ff672d3c03b]
+	(No symbol) [0x7ff672d3c642]
+	(No symbol) [0x7ff672d3cb35]
+	(No symbol) [0x7ff672ee5de1]
+	(No symbol) [0x7ff672ef5a98]
+	(No symbol) [0x7ff673139b45]
+	(No symbol) [0x7ff6731401c1]
+	(No symbol) [0x7ff672fe3dbc]
+	(No symbol) [0x7ff672d3bcfe]
+	(No symbol) [0x7ff673218eaf]
+	(No symbol) [0x7ffc3ffd7374]
+	(No symbol) [0x7ffc41d9cc91]
+
+"

@@ -13,6 +13,7 @@
 - ✅ Handles custom first/last name fields and "Submit and Apply" flow
 - ✅ Detects daily application quota limits
 - ✅ Saves results (passed/failed) to a CSV file
+- ✅ Records application and browser exceptions with timestamps and diagnostic details in `application_errors.csv`
 - ✅ Avoids repeat applications to the same company and role using `applied_jobs.csv`
 - ✅ Uses **Microsoft Edge** browser
 - ✅ Uses `webdriver-manager` for automatic driver download (no manual setup!)
@@ -132,6 +133,7 @@ Naukri-autoapply-bot/
 ├── README.md             # This file
 ├── application_history.py # Company/role duplicate-application history
 ├── application_answers.csv # Learned answers for Easy Apply questions
+├── application_errors.csv # Application errors with job context and tracebacks (auto-generated)
 ├── applied_jobs.csv      # Persistent company/role application ledger
 ├── Naukri-Edge.py        # Main bot script for Microsoft Edge browser
 ├── Naukri autoapply jobs.ipynb  # Jupyter Notebook version (legacy)
@@ -148,7 +150,7 @@ When an Easy Apply question has no saved answer, the Edge bot waits while you an
 | Browser driver not found | `webdriver-manager` handles this automatically. Ensure you're connected to the internet on first run. |
 | Login failed | Double-check your `NAUKRI_EMAIL` and `NAUKRI_PASSWORD` in `.env` |
 | No jobs found | Try broader keywords or remove the location filter |
-| `StaleElementReferenceException` while answering Easy Apply questions | The bot retries chatbot message reads after the form updates. If an element remains stale, that job is recorded as failed and processing continues with the next job. |
+| An exception occurs while applying | The affected job is recorded as failed, its timestamp, job details, exception, and traceback are appended to `application_errors.csv`, and the bot continues with the next job. Naukri's temporary request-error page still stops the run. |
 | Naukri says "There was an error while processing your request" | The bot stops applying, saves the results, and shows a dialog asking you to try again sometime. Click **OK** to exit. |
 | "Daily quota expired" | Naukri limits daily applications. Try again the next day. |
 | Script too fast/slow | Adjust the `time.sleep()` values in the script if needed |
