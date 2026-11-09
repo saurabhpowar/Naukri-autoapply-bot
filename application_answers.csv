@@ -137,3 +137,6 @@ Are you presently availble in bangalore?,YES,radio,2026-11-09T10:17:07.440351
 "2nd round is manadatory F2F, are you available to attend?",YES,radio,2026-11-09T10:17:09.980332
 Which of these locations are you willing to relocate to?,"Pune, Bengaluru, Chennai, hyderabad",manual,2026-11-09T10:20:07.143342
 are u comfortable with 5 days work from office,YES,radio,2026-11-09T10:20:14.894967
+Which describes your experience with version control and software delivery?,"Git branching/merging, Agile/Scrum, and hands-on CI/CD",radio,2026-11-09T11:21:26.125751
+Which additional technologies have you used in your projects?,"Angular, JavaScript, HTML5 and CSS, Azure or AWS, React, CI/CD pipelines and DevOps",manual,2026-11-09T11:21:34.551676
+Are you comfortable working from the office in Delhi?,"Yes, I am comfortable working from the office in Delhi",radio,2026-11-09T11:21:40.255815
