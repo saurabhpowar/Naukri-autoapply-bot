@@ -2,7 +2,7 @@
 Naukri Auto-Apply Bot - Microsoft Edge Version (Updated for Naukri.com 2026)
 ================================================================================
 Automates job applications on Naukri.com using Selenium with Edge browser.
-Opens each job keyword search in a separate tab for faster collection.
+Applies to jobs from the manually filtered results page in the current Edge tab.
 
 Usage:
     1. Copy .env.example to .env and fill in your details
@@ -22,7 +22,7 @@ import csv
 import difflib
 import traceback
 from datetime import datetime
-from urllib.parse import urlencode, urlparse
+from urllib.parse import urlparse
 import pandas as pd
 from dotenv import load_dotenv
 from selenium import webdriver
@@ -62,9 +62,6 @@ FIRSTNAME = os.getenv('FIRSTNAME', '')
 LASTNAME = os.getenv('LASTNAME', '')
 
 # --- Job Search ---
-KEYWORDS = [kw.strip() for kw in os.getenv('KEYWORDS', '').split(',') if kw.strip()]
-LOCATION = os.getenv('LOCATION', '').strip()
-JOB_FRESHNESS_DAYS = int(os.getenv('JOB_FRESHNESS_DAYS', '0'))
 EXCLUDED_COMPANIES = [
     company.strip().casefold()
     for company in os.getenv('EXCLUDED_COMPANIES', '').split(',')
@@ -174,14 +171,10 @@ def validate_config():
         errors.append("NAUKRI_EMAIL is not set in .env")
     if not NAUKRI_PASSWORD:
         errors.append("NAUKRI_PASSWORD is not set in .env")
-    if not KEYWORDS:
-        errors.append("KEYWORDS is not set in .env (comma-separated job roles)")
     if not FIRSTNAME:
         errors.append("FIRSTNAME is not set in .env")
     if not LASTNAME:
         errors.append("LASTNAME is not set in .env")
-    if JOB_FRESHNESS_DAYS not in (0, 3, 7, 15, 30):
-        errors.append("JOB_FRESHNESS_DAYS must be 0 (all jobs), 3, 7, 15, or 30")
     if MIN_CANDIDATE_EXPERIENCE_YEARS >= MAX_CANDIDATE_EXPERIENCE_YEARS:
         errors.append("MIN_CANDIDATE_EXPERIENCE_YEARS must be less than MAX_CANDIDATE_EXPERIENCE_YEARS")
     if not MIN_CANDIDATE_EXPERIENCE_YEARS < CANDIDATE_EXPERIENCE_YEARS < MAX_CANDIDATE_EXPERIENCE_YEARS:
@@ -270,29 +263,6 @@ def login_naukri(driver):
     logger.info("Login completed.")
 
 
-def build_search_url(keyword, page_num):
-    """Build a Naukri search URL for a keyword and page number."""
-    keyword_slug = keyword.lower().replace(' ', '-')
-    if not LOCATION:
-        search_path = f"{keyword_slug}-jobs"
-    else:
-        location_slug = LOCATION.lower().replace(' ', '-')
-        search_path = f"{keyword_slug}-jobs-in-{location_slug}"
-    params = {"k": keyword, "pageNo": page_num}
-    if JOB_FRESHNESS_DAYS:
-        params["jobAge"] = JOB_FRESHNESS_DAYS
-    query = urlencode(params)
-    return f"https://www.naukri.com/{search_path}?{query}"
-
-
-def build_search_urls():
-    """
-    Build the first search URL for every keyword.
-    Later pages are loaded until a page contains no new job links.
-    """
-    return [(keyword, build_search_url(keyword, 1)) for keyword in KEYWORDS]
-
-
 def collect_job_links_from_tab(driver, window_handle):
     """
     Switch to a specific tab, scrape job links from the page.
@@ -351,44 +321,67 @@ def collect_job_links_from_tab(driver, window_handle):
     return links
 
 
-def iter_search_pages(driver, search_urls):
-    """
-    Yield one page of new job links at a time, stopping when results repeat.
-    """
-    logger.info("=" * 50)
-    logger.info(f"Paginating {len(search_urls)} keyword searches page by page...")
-    logger.info("=" * 50)
+def wait_for_manual_search():
+    """Wait while the user searches and applies filters in the open Edge tab."""
+    logger.info(
+        "Use the current Edge tab to open Naukri job results and apply your filters. "
+        "The bot will only process that page; it will not change the search or pagination."
+    )
+    try:
+        input("After filtering the current results page, press Enter to capture it: ")
+    except EOFError:
+        logger.warning(
+            "No interactive console available for manual search; stopping before applying."
+        )
+        return False
+    return True
 
-    original_window = driver.current_window_handle
-    for keyword, first_url in search_urls:
-        page_num = 1
-        keyword_seen_urls = set()
-        while True:
-            url = first_url if page_num == 1 else build_search_url(keyword, page_num)
-            logger.info(f"[{keyword} page {page_num}] Loading results: {url}")
-            try:
-                driver.get(url)
-            except WebDriverException as error:
-                logger.warning(f"[{keyword} page {page_num}] Failed to load search page: {error}")
-                break
 
-            tab_links = collect_job_links_from_tab(driver, original_window)
-            new_page_links = []
-            for job in tab_links:
-                if job["url"] not in keyword_seen_urls:
-                    keyword_seen_urls.add(job["url"])
-                    new_page_links.append(job)
+def confirm_search_page(driver, page_jobs):
+    """Wait for approval before applying to jobs collected from the current results page."""
+    logger.info(
+        "Review the manually filtered Naukri results page before approving applications: "
+        "queued jobs=%s, url=%s",
+        len(page_jobs),
+        driver.current_url,
+    )
+    logger.info(
+        "Application filters: candidate experience=%g years (allowed range: %g-%g); "
+        "excluded companies=%s",
+        CANDIDATE_EXPERIENCE_YEARS,
+        MIN_CANDIDATE_EXPERIENCE_YEARS,
+        MAX_CANDIDATE_EXPERIENCE_YEARS,
+        ", ".join(EXCLUDED_COMPANIES) or "None",
+    )
 
-            logger.info(
-                f"[{keyword} page {page_num}] Collected {len(new_page_links)} new job links "
-                f"from {driver.current_url}"
+    while True:
+        try:
+            response = input(
+                "Type 'y' to apply to jobs captured from this page, or 'n' to stop: "
+            ).strip().casefold()
+        except EOFError:
+            logger.warning(
+                "No interactive console available for search confirmation; "
+                "stopping before applying."
             )
-            if not new_page_links:
-                logger.info(f"[{keyword}] No new jobs on page {page_num}; stopping pagination.")
-                break
+            return False
 
-            yield keyword, page_num, new_page_links
-            page_num += 1
+        if response in ("y", "yes"):
+            confirmed_jobs = collect_job_links_from_tab(
+                driver, driver.current_window_handle
+            )
+            captured_urls = {job["url"] for job in page_jobs}
+            confirmed_urls = {job["url"] for job in confirmed_jobs}
+            if captured_urls != confirmed_urls:
+                logger.warning(
+                    "The results page changed while waiting for confirmation; "
+                    "no jobs were applied. Run again to capture the current results."
+                )
+                return False
+            return True
+        if response in ("n", "no", "q", "quit"):
+            return False
+        print("Please enter 'y' to continue or 'n' to stop.")
 
 
 def click_apply_button(driver, link):
@@ -1230,15 +1223,8 @@ def main():
         return
     clean_expired_jobs()
 
-    logger.info(f"Keywords: {KEYWORDS}")
-    logger.info(f"Location: {LOCATION or 'Anywhere'}")
-    logger.info(
-        f"Job freshness: last {JOB_FRESHNESS_DAYS} days"
-        if JOB_FRESHNESS_DAYS
-        else "Job freshness: all dates"
-    )
+    logger.info("Search mode: manually filtered current results page (no auto-pagination)")
     logger.info(f"Max applications: {MAX_APPLICATIONS}")
-    logger.info("Search pagination: continues until a page has no new jobs")
     logger.info(f"Excluded companies: {', '.join(EXCLUDED_COMPANIES) or 'None'}")
     logger.info(
         f"Experience filter: candidate {CANDIDATE_EXPERIENCE_YEARS:g} years must be strictly "
@@ -1258,44 +1244,48 @@ def main():
         # Login
         login_naukri(driver)
 
-        # Build all search URLs
-        search_urls = build_search_urls()
-        logger.info(f"Total keyword searches to paginate: {len(search_urls)}")
-
-        # Apply every job on a results page before requesting the next page.
         search_window = driver.current_window_handle
-        processed_any_jobs = False
-        quota_expired = False
-        for keyword, page_num, page_jobs in iter_search_pages(driver, search_urls):
-            processed_any_jobs = True
-            logger.info(
-                f"Starting applications for {keyword} page {page_num} "
-                f"({len(page_jobs)} jobs)"
-            )
-            (
-                page_applied,
-                page_failed,
-                page_skipped,
-                page_results,
-                quota_expired,
-                request_error_detected,
-            ) = apply_to_jobs(
-                driver,
-                page_jobs,
-                search_window,
-                already_applied=applied,
-            )
-            applied += page_applied
-            failed += page_failed
-            skipped += page_skipped
-            for result_type, links in page_results.items():
-                applied_list[result_type].extend(links)
+        if wait_for_manual_search():
+            check_naukri_request_error(driver)
+            page_jobs = collect_job_links_from_tab(driver, search_window)
+            unique_jobs = []
+            seen_job_urls = set()
+            for job in page_jobs:
+                if job["url"] not in seen_job_urls:
+                    seen_job_urls.add(job["url"])
+                    unique_jobs.append(job)
+            page_jobs = unique_jobs
 
-            if request_error_detected or quota_expired or applied >= MAX_APPLICATIONS:
-                break
-
-        if not processed_any_jobs:
-            logger.warning("No job links found. Check your keywords and location.")
+            if not page_jobs:
+                logger.warning(
+                    "No job links found on the current page. Open a filtered Naukri "
+                    "results page in the current Edge tab and run the bot again."
+                )
+            elif confirm_search_page(driver, page_jobs):
+                logger.info(
+                    "Starting applications from the current results page (%s unique jobs)",
+                    len(page_jobs),
+                )
+                (
+                    page_applied,
+                    page_failed,
+                    page_skipped,
+                    page_results,
+                    _,
+                    request_error_detected,
+                ) = apply_to_jobs(
+                    driver,
+                    page_jobs,
+                    search_window,
+                    already_applied=applied,
+                )
+                applied += page_applied
+                failed += page_failed
+                skipped += page_skipped
+                for result_type, links in page_results.items():
+                    applied_list[result_type].extend(links)
+            else:
+                logger.info("Search confirmation was not approved; stopping the run.")
 
         # Save results
         save_results(applied_list)

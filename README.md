@@ -5,8 +5,9 @@
 ## 📋 Features
 
 - ✅ Automatically logs in to Naukri.com
-- ✅ **Paginated search** — Continues through result pages for every keyword until no new jobs are found
-- ✅ Searches for jobs by keywords and location (updated for 2026 Naukri redesign)
+- ✅ **Manual search and filtering** — Choose the search, filters, and current results page directly in Edge
+- ✅ **Current-page review before applying** — Shows the captured job count and URL for confirmation
+- ✅ Applies only to unique jobs found on the current results page; does not navigate or paginate
 - ✅ Visits job listings and clicks "Apply" / "Apply on company site"
 - ✅ Handles Easy Apply questions using saved answers and continues through the form
 - ✅ Waits for manual answers to unknown questions, saves them to `application_answers.csv`, and reuses them later
@@ -18,17 +19,13 @@
 - ✅ Uses **Microsoft Edge** browser
 - ✅ Uses `webdriver-manager` for automatic driver download (no manual setup!)
 
-## 🚀 How Paginated Search Works
+## 🚀 How Current-Page Applications Work
 
-For each keyword, the bot visits result pages in sequence and keeps going until a page returns no new jobs:
+1. The bot logs in and waits while you use the **current Edge tab** to search for jobs and apply Naukri's filters manually.
+2. After the filtered results page is ready, press Enter in the console. The bot collects unique job links from that page only.
+3. Review the current page URL and queued job count. Type `y` to apply to those jobs, or `n` to stop.
 
-```
-Keyword: "python developer"  → Page 1 → Page 2 → ... → no new jobs
-Keyword: "data analyst"      → Page 1 → Page 2 → ... → no new jobs
-Keyword: "software engineer" → Page 1 → Page 2 → ... → no new jobs
-```
-
-Duplicate job links across keywords and pages are removed before applying.
+The bot does not rebuild the search URL, reset filters, or move to any previous or next page. To use a different results page, run the bot again and select that page manually before pressing Enter.
 
 ## 🚀 Quick Start
 
@@ -80,20 +77,11 @@ NAUKRI_PASSWORD=your_password
 FIRSTNAME=YourFirstName
 LASTNAME=YourLastName
 
-# Job search keywords (comma-separated)
-KEYWORDS=python developer, data analyst, software engineer
-
-# Location (leave empty for all locations, or specify a city like "bangalore", "mumbai", "remote")
-LOCATION=bangalore
-
-# Job freshness filter: 0 = all dates, or choose 3, 7, 15, or 30 days
-JOB_FRESHNESS_DAYS=7
-
 # Maximum applications per run (Naukri allows ~100/day)
 MAX_APPLICATIONS=50
 ```
 
-`JOB_FRESHNESS_DAYS` limits search results to jobs posted within the selected period, matching Naukri's **Freshness** filter. Use `0` to disable the filter.
+Choose keywords, location, freshness, and other search criteria manually in Naukri. Legacy `KEYWORDS`, `LOCATION`, and `JOB_FRESHNESS_DAYS` settings in an existing `.env` file are not used by this current-page workflow.
 
 ### 4. Run the bot
 

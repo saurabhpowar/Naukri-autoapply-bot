@@ -874,3 +874,100 @@ Symbols not available. Dumping unresolved backtrace:
 	(No symbol) [0x7ffc41d9cc91]
 
 "
+2026-11-09T12:48:32+05:30,clicking_apply_button,2,20,MSC Technology,Senior Dot NET Full Stack Developer (Angular / Dot Net Core),https://www.naukri.com/job-listings-senior-dot-net-full-stack-developer-angular-dot-net-core-msc-technology-ambattur-chennai-4-to-6-years-020926033292,AttributeError,'NoneType' object has no attribute 'is_displayed',"Traceback (most recent call last):
+  File ""i:\Auto_job_applier_Naukri-main\Naukri-autoapply-bot\Naukri-Edge.py"", line 1043, in apply_to_jobs
+    if not click_apply_button(driver, link):
+           ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^
+  File ""i:\Auto_job_applier_Naukri-main\Naukri-autoapply-bot\Naukri-Edge.py"", line 463, in click_apply_button
+    apply_btn = WebDriverWait(driver, 3).until(
+        EC.element_to_be_clickable((by, selector))
+    )
+  File ""I:\Auto_job_applier_Naukri-main\Naukri-autoapply-bot\.venv\Lib\site-packages\selenium\webdriver\support\wait.py"", line 112, in until
+    value = method(self._driver)
+  File ""I:\Auto_job_applier_Naukri-main\Naukri-autoapply-bot\.venv\Lib\site-packages\selenium\webdriver\support\expected_conditions.py"", line 519, in _predicate
+    element = visibility_of(target)(driver)
+  File ""I:\Auto_job_applier_Naukri-main\Naukri-autoapply-bot\.venv\Lib\site-packages\selenium\webdriver\support\expected_conditions.py"", line 212, in _predicate
+    return _element_if_visible(element)
+  File ""I:\Auto_job_applier_Naukri-main\Naukri-autoapply-bot\.venv\Lib\site-packages\selenium\webdriver\support\expected_conditions.py"", line 227, in _element_if_visible
+    return element if element.is_displayed() == visibility else False
+                      ^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'NoneType' object has no attribute 'is_displayed'
+"
+2026-11-09T12:59:33+05:30,answering_application_questions,7,10,Motherson Technology Services Limited,.NET Application Developer,https://www.naukri.com/job-listings-net-application-developer-motherson-technology-services-limited-chennai-5-to-10-years-091126000636,StaleElementReferenceException,"Message: stale element reference: stale element not found in the current frame
+  (Session info: MicrosoftEdge=156.0.4314.58); For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#staleelementreferenceexception
+Stacktrace:
+Symbols not available. Dumping unresolved backtrace:
+	(No symbol) [0x7ff6c1750e65]
+	(No symbol) [0x7ff6c1697ce4]
+	(No symbol) [0x7ff6c1adf91f]
+	(No symbol) [0x7ff6c142a864]
+	(No symbol) [0x7ff6c142cca5]
+	(No symbol) [0x7ff6c142cd6f]
+	(No symbol) [0x7ff6c146bcbc]
+	(No symbol) [0x7ff6c149119a]
+	(No symbol) [0x7ff6c146651d]
+	(No symbol) [0x7ff6c146641a]
+	(No symbol) [0x7ff6c146651d]
+	(No symbol) [0x7ff6c14ae458]
+	(No symbol) [0x7ff6c1465d5c]
+	(No symbol) [0x7ff6c1464f4a]
+	(No symbol) [0x7ff6c1465b83]
+	(No symbol) [0x7ff6c15a5de1]
+	(No symbol) [0x7ff6c15b5a98]
+	(No symbol) [0x7ff6c17f9b45]
+	(No symbol) [0x7ff6c18001c1]
+	(No symbol) [0x7ff6c16a3dbc]
+	(No symbol) [0x7ff6c169e5d4]
+	(No symbol) [0x7ff6c169e6fa]
+	(No symbol) [0x7ff6c168fb08]
+	(No symbol) [0x7ffc3ffd7374]
+	(No symbol) [0x7ffc41d9cc91]
+","Traceback (most recent call last):
+  File ""i:\Auto_job_applier_Naukri-main\Naukri-autoapply-bot\Naukri-Edge.py"", line 1032, in apply_to_jobs
+    answer_application_questions(driver, known_answers)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File ""i:\Auto_job_applier_Naukri-main\Naukri-autoapply-bot\Naukri-Edge.py"", line 785, in answer_application_questions
+    initial_text = text_area.text.strip()
+                   ^^^^^^^^^^^^^^
+  File ""I:\Auto_job_applier_Naukri-main\Naukri-autoapply-bot\.venv\Lib\site-packages\selenium\webdriver\remote\webelement.py"", line 103, in text
+    return self._execute(Command.GET_ELEMENT_TEXT)[""value""]
+           ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File ""I:\Auto_job_applier_Naukri-main\Naukri-autoapply-bot\.venv\Lib\site-packages\selenium\webdriver\remote\webelement.py"", line 504, in _execute
+    return self._parent.execute(command, params)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File ""I:\Auto_job_applier_Naukri-main\Naukri-autoapply-bot\.venv\Lib\site-packages\selenium\webdriver\remote\webdriver.py"", line 506, in execute
+    self.error_handler.check_response(response)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File ""I:\Auto_job_applier_Naukri-main\Naukri-autoapply-bot\.venv\Lib\site-packages\selenium\webdriver\remote\errorhandler.py"", line 232, in check_response
+    raise exception_class(message, screen, stacktrace)
+selenium.common.exceptions.StaleElementReferenceException: Message: stale element reference: stale element not found in the current frame
+  (Session info: MicrosoftEdge=156.0.4314.58); For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#staleelementreferenceexception
+Stacktrace:
+Symbols not available. Dumping unresolved backtrace:
+	(No symbol) [0x7ff6c1750e65]
+	(No symbol) [0x7ff6c1697ce4]
+	(No symbol) [0x7ff6c1adf91f]
+	(No symbol) [0x7ff6c142a864]
+	(No symbol) [0x7ff6c142cca5]
+	(No symbol) [0x7ff6c142cd6f]
+	(No symbol) [0x7ff6c146bcbc]
+	(No symbol) [0x7ff6c149119a]
+	(No symbol) [0x7ff6c146651d]
+	(No symbol) [0x7ff6c146641a]
+	(No symbol) [0x7ff6c146651d]
+	(No symbol) [0x7ff6c14ae458]
+	(No symbol) [0x7ff6c1465d5c]
+	(No symbol) [0x7ff6c1464f4a]
+	(No symbol) [0x7ff6c1465b83]
+	(No symbol) [0x7ff6c15a5de1]
+	(No symbol) [0x7ff6c15b5a98]
+	(No symbol) [0x7ff6c17f9b45]
+	(No symbol) [0x7ff6c18001c1]
+	(No symbol) [0x7ff6c16a3dbc]
+	(No symbol) [0x7ff6c169e5d4]
+	(No symbol) [0x7ff6c169e6fa]
+	(No symbol) [0x7ff6c168fb08]
+	(No symbol) [0x7ffc3ffd7374]
+	(No symbol) [0x7ffc41d9cc91]
+
+"
