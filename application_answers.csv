@@ -151,3 +151,18 @@ Are you Available for Face to Face interviews?,Yes,radio,2026-11-09T13:03:46.197
 Please select the city you are currently residing or willing to relocate to,"Pune, Maharashtra",radio,2026-11-09T13:03:49.857834
 Can you join immediatly?,1 Month,radio,2026-11-09T13:04:14.770782
 Can you attend Face to face interview?,YES,radio,2026-11-09T13:04:18.154283
+Can you attend Face to Face interview on 31st October 2026 in any of the below locations,"Bengaluru, Pune, Hyderabad",manual,2026-11-09T13:49:55.142842
+Do you have PF for all the companies you worked for,ye,text,2026-11-09T13:50:01.711446
+Current Organization Name,in,text,2026-11-09T13:50:27.424274
+"Are you currently residing in Kolkata, Pune, Bangalore?",Bangalore,radio,2026-11-09T13:50:36.259710
+"Are you available for Kolkata, Pune, Bangalore work location?",Yes,manual,2026-11-09T13:50:45.771961
+Are you available to attend In-Person Interview on 10th September 2026,Yes,radio,2026-11-09T13:50:51.523706
+Please upload your resume.,Resume_Saurabh_Powar_6161_340.pdf,manual,2026-11-09T13:51:56.416351
+Notice Period,30 Days,radio,2026-11-09T13:52:25.018866
+Have you been employed by Happiest Minds before?,No,radio,2026-11-09T13:52:31.574895
+Relevant Experience (in years),5,text,2026-11-09T13:53:29.873350
+Please select your visa type,Other,radio,2026-11-09T13:53:35.731712
+Are you legally authorized to work in the country where you are applying?,Yes,radio,2026-11-09T13:53:39.153356
+Do you require sponsorship for work authorization now or in the future?,No,radio,2026-11-09T13:54:35.098103
+Currently Serving Notice Period?,Yes,radio,2026-11-09T13:54:46.197019
+Available Date of Joining,04/01/2027,manual,2026-11-09T13:56:04.845060
