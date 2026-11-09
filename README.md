@@ -85,9 +85,14 @@ KEYWORDS=python developer, data analyst, software engineer
 # Location (leave empty for all locations, or specify a city like "bangalore", "mumbai", "remote")
 LOCATION=bangalore
 
+# Job freshness filter: 0 = all dates, or choose 3, 7, 15, or 30 days
+JOB_FRESHNESS_DAYS=7
+
 # Maximum applications per run (Naukri allows ~100/day)
 MAX_APPLICATIONS=50
 ```
+
+`JOB_FRESHNESS_DAYS` limits search results to jobs posted within the selected period, matching Naukri's **Freshness** filter. Use `0` to disable the filter.
 
 ### 4. Run the bot
 

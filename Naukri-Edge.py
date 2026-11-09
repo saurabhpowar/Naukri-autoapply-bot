@@ -63,6 +63,7 @@ LASTNAME = os.getenv('LASTNAME', '')
 # --- Job Search ---
 KEYWORDS = [kw.strip() for kw in os.getenv('KEYWORDS', '').split(',') if kw.strip()]
 LOCATION = os.getenv('LOCATION', '').strip()
+JOB_FRESHNESS_DAYS = int(os.getenv('JOB_FRESHNESS_DAYS', '0'))
 EXCLUDED_COMPANIES = [
     company.strip().casefold()
     for company in os.getenv('EXCLUDED_COMPANIES', '').split(',')
@@ -120,6 +121,8 @@ def validate_config():
         errors.append("FIRSTNAME is not set in .env")
     if not LASTNAME:
         errors.append("LASTNAME is not set in .env")
+    if JOB_FRESHNESS_DAYS not in (0, 3, 7, 15, 30):
+        errors.append("JOB_FRESHNESS_DAYS must be 0 (all jobs), 3, 7, 15, or 30")
     if MIN_CANDIDATE_EXPERIENCE_YEARS >= MAX_CANDIDATE_EXPERIENCE_YEARS:
         errors.append("MIN_CANDIDATE_EXPERIENCE_YEARS must be less than MAX_CANDIDATE_EXPERIENCE_YEARS")
     if not MIN_CANDIDATE_EXPERIENCE_YEARS < CANDIDATE_EXPERIENCE_YEARS < MAX_CANDIDATE_EXPERIENCE_YEARS:
@@ -216,7 +219,10 @@ def build_search_url(keyword, page_num):
     else:
         location_slug = LOCATION.lower().replace(' ', '-')
         search_path = f"{keyword_slug}-jobs-in-{location_slug}"
-    query = urlencode({"k": keyword, "pageNo": page_num})
+    params = {"k": keyword, "pageNo": page_num}
+    if JOB_FRESHNESS_DAYS:
+        params["jobAge"] = JOB_FRESHNESS_DAYS
+    query = urlencode(params)
     return f"https://www.naukri.com/{search_path}?{query}"
 
 
@@ -1072,6 +1078,11 @@ def main():
 
     logger.info(f"Keywords: {KEYWORDS}")
     logger.info(f"Location: {LOCATION or 'Anywhere'}")
+    logger.info(
+        f"Job freshness: last {JOB_FRESHNESS_DAYS} days"
+        if JOB_FRESHNESS_DAYS
+        else "Job freshness: all dates"
+    )
     logger.info(f"Max applications: {MAX_APPLICATIONS}")
     logger.info("Search pagination: continues until a page has no new jobs")
     logger.info(f"Excluded companies: {', '.join(EXCLUDED_COMPANIES) or 'None'}")
