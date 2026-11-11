@@ -321,11 +321,97 @@ def collect_job_links_from_tab(driver, window_handle):
     return links
 
 
+def get_search_page_job_urls(driver):
+    """Return job URLs currently rendered on the results page."""
+    soup = BeautifulSoup(driver.page_source, 'html5lib')
+    job_wrappers = soup.find_all('div', class_='srp-jobtuple-wrapper')
+    if not job_wrappers:
+        job_wrappers = soup.find_all('div', class_='cust-job-tuple')
+
+    urls = []
+    for job_wrapper in job_wrappers:
+        title_link = job_wrapper.find('a', class_='title')
+        href = title_link.get('href') if title_link else None
+        if href:
+            urls.append(
+                f"https://www.naukri.com{href}" if href.startswith('/') else href
+            )
+    return tuple(urls)
+
+
+def advance_to_next_search_page(driver, search_window):
+    """Click the current results page's Next control without rebuilding its URL."""
+    driver.switch_to.window(search_window)
+    previous_url = driver.current_url
+    previous_job_urls = get_search_page_job_urls(driver)
+    next_page_locators = [
+        (By.CSS_SELECTOR, "a[rel='next']"),
+        (
+            By.XPATH,
+            "//*[self::a or self::button][@aria-label and "
+            "contains(translate(@aria-label, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', "
+            "'abcdefghijklmnopqrstuvwxyz'), 'next')]",
+        ),
+        (
+            By.XPATH,
+            "//*[self::a or self::button][@title and "
+            "contains(translate(@title, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', "
+            "'abcdefghijklmnopqrstuvwxyz'), 'next')]",
+        ),
+        (
+            By.XPATH,
+            "//*[self::a or self::button][contains("
+            "translate(normalize-space(.), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', "
+            "'abcdefghijklmnopqrstuvwxyz'), 'next')]",
+        ),
+    ]
+
+    next_button = None
+    for by, selector in next_page_locators:
+        try:
+            for candidate in driver.find_elements(by, selector):
+                if (
+                    candidate.is_displayed()
+                    and candidate.is_enabled()
+                    and candidate.get_attribute("aria-disabled") != "true"
+                    and candidate.get_attribute("disabled") is None
+                    and "disabled" not in (candidate.get_attribute("class") or "").casefold()
+                ):
+                    next_button = candidate
+                    break
+        except StaleElementReferenceException:
+            continue
+        if next_button:
+            break
+
+    if not next_button:
+        logger.info("No enabled Next control found; reached the end of the current search.")
+        return False
+
+    try:
+        next_button.click()
+        WebDriverWait(driver, 10).until(
+            lambda browser: (
+                browser.current_url != previous_url
+                or get_search_page_job_urls(browser) != previous_job_urls
+            )
+        )
+    except (StaleElementReferenceException, TimeoutException, WebDriverException) as error:
+        logger.warning(
+            "Could not verify that the Next control opened another results page: %s",
+            error,
+        )
+        return False
+
+    logger.info("Advanced to the next results page: %s", driver.current_url)
+    return True
+
+
 def wait_for_manual_search():
     """Wait while the user searches and applies filters in the open Edge tab."""
     logger.info(
         "Use the current Edge tab to open Naukri job results and apply your filters. "
-        "The bot will only process that page; it will not change the search or pagination."
+        "The bot will start there and move forward using Naukri's Next control."
     )
     try:
         input("After filtering the current results page, press Enter to capture it: ")
@@ -412,7 +498,7 @@ def click_apply_button(driver, link):
             )
             apply_btn.click()
             return True
-        except (TimeoutException, NoSuchElementException):
+        except (TimeoutException, NoSuchElementException, AttributeError):
             continue
 
     return False
@@ -1223,7 +1309,9 @@ def main():
         return
     clean_expired_jobs()
 
-    logger.info("Search mode: manually filtered current results page (no auto-pagination)")
+    logger.info(
+        "Search mode: manually filtered starting page, then forward-only pagination"
+    )
     logger.info(f"Max applications: {MAX_APPLICATIONS}")
     logger.info(f"Excluded companies: {', '.join(EXCLUDED_COMPANIES) or 'None'}")
     logger.info(
@@ -1262,28 +1350,68 @@ def main():
                     "results page in the current Edge tab and run the bot again."
                 )
             elif confirm_search_page(driver, page_jobs):
-                logger.info(
-                    "Starting applications from the current results page (%s unique jobs)",
-                    len(page_jobs),
-                )
-                (
-                    page_applied,
-                    page_failed,
-                    page_skipped,
-                    page_results,
-                    _,
-                    request_error_detected,
-                ) = apply_to_jobs(
-                    driver,
-                    page_jobs,
-                    search_window,
-                    already_applied=applied,
-                )
-                applied += page_applied
-                failed += page_failed
-                skipped += page_skipped
-                for result_type, links in page_results.items():
-                    applied_list[result_type].extend(links)
+                visited_pages = {
+                    (driver.current_url, get_search_page_job_urls(driver))
+                }
+                page_number = 1
+                while True:
+                    logger.info(
+                        "Processing selected results page %s (%s new jobs)",
+                        page_number,
+                        len(page_jobs),
+                    )
+                    if page_jobs:
+                        (
+                            page_applied,
+                            page_failed,
+                            page_skipped,
+                            page_results,
+                            quota_expired,
+                            request_error_detected,
+                        ) = apply_to_jobs(
+                            driver,
+                            page_jobs,
+                            search_window,
+                            already_applied=applied,
+                        )
+                        applied += page_applied
+                        failed += page_failed
+                        skipped += page_skipped
+                        for result_type, links in page_results.items():
+                            applied_list[result_type].extend(links)
+
+                    if (
+                        request_error_detected
+                        or quota_expired
+                        or applied >= MAX_APPLICATIONS
+                    ):
+                        break
+                    if not advance_to_next_search_page(driver, search_window):
+                        break
+
+                    page_signature = (
+                        driver.current_url,
+                        get_search_page_job_urls(driver),
+                    )
+                    if page_signature in visited_pages:
+                        logger.warning(
+                            "Pagination returned to a results page already processed; "
+                            "stopping to avoid applying duplicates."
+                        )
+                        break
+                    visited_pages.add(page_signature)
+
+                    page_number += 1
+                    current_jobs = collect_job_links_from_tab(driver, search_window)
+                    page_jobs = []
+                    for job in current_jobs:
+                        if job["url"] not in seen_job_urls:
+                            seen_job_urls.add(job["url"])
+                            page_jobs.append(job)
+                    logger.info(
+                        "Collected %s new jobs from the next results page.",
+                        len(page_jobs),
+                    )
             else:
                 logger.info("Search confirmation was not approved; stopping the run.")
 

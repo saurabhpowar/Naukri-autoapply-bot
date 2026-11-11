@@ -166,3 +166,31 @@ Are you legally authorized to work in the country where you are applying?,Yes,ra
 Do you require sponsorship for work authorization now or in the future?,No,radio,2026-11-09T13:54:35.098103
 Currently Serving Notice Period?,Yes,radio,2026-11-09T13:54:46.197019
 Available Date of Joining,04/01/2027,manual,2026-11-09T13:56:04.845060
+Please select the city you are currently residing or willing to relocate to,"Bengaluru, Hyderabad",manual,2026-11-09T14:27:36.988321
+Are you comfortable relocating to Ahmedabad and working onsite in night shift (6:30 PM IST to 3:30 AM IST)?,Yes,radio,2026-11-09T14:29:48.278015
+Are you available for Taking F2F on November 10 (Tuesday) in Bangalore?,Yes,radio,2026-11-09T15:02:44.522598
+Please select the city you are currently residing or willing to relocate to,"Bengaluru, Karnataka",radio,2026-11-09T18:40:15.930050
+What is your current location?,pune,text,2026-11-09T18:42:28.135083
+"If Serving Notice or Done with the Notice, please let us know your last working date with month and year??",01/,text,2026-11-11T11:55:35.674558
+Current and Expecting CTC??,950,text,2026-11-11T11:56:05.061966
+"Are you comfortable to work from office on hybrid mode, 3 days/week??",ye,text,2026-11-11T11:56:34.339943
+Which language have you written most of your production scrapers in?,.Net,radio,2026-11-11T11:57:34.884380
+Are you available for Face-to-Face interview in our Pune office?,yes,text,2026-11-11T11:58:14.646704
+Are you fine for 5days working from Pune office?,y,text,2026-11-11T11:58:20.103886
+Are you currently in Pune,Yes,radio,2026-11-11T11:58:24.639266
+Are you available for virtual interview tomorrow ?,Yes,radio,2026-11-11T11:58:38.489291
+Are you currently residing in Kolkata or willing to relocate to Kolkata?,Yes,radio,2026-11-11T11:59:21.522056
+Roughly how many different websites have you built or maintained scrapers for?,5,text,2026-11-11T12:23:20.772269
+At which company and on which project did you do your scraping work?,c,text,2026-11-11T12:23:27.354190
+"Describe one website you scraped in C#: Details like - what data, what volume, what blocked you, and how you solved it.",5,text,2026-11-11T12:23:43.445159
+"Which proxy or unblocking services have you used, if any?",5,text,2026-11-11T12:23:45.880880
+Comfortable with US shift hours and on-call?,Yes,radio,2026-11-11T12:23:47.246474
+"This role is hybrid in Mumbai, in office for the first few days. Are you OK with that?",Yes,radio,2026-11-11T12:25:41.124700
+Are you got laid off ?,no,text,2026-11-11T12:40:22.575203
+"Do you have either of these certifications AZ-204, AZ-900, or any other certification?",yes,text,2026-11-11T12:43:56.113725
+Once offer released,I can Join in 30 Days,radio,2026-11-11T12:46:35.248954
+Currently Holding Offers,Yes,radio,2026-11-11T12:46:40.899905
+EXPECTED CTC,15,text,2026-11-11T12:46:46.268797
+Interested to Join Infosys,NO,radio,2026-11-11T12:47:05.707681
+"Do you have exp with batch Job Scheduler (Tidal, Control-M, Autosys, or similar)",Yes,radio,2026-11-11T12:50:12.454265
+Do you have exp working with Healthcare payer ( claim Adjudication)?,Yes,radio,2026-11-11T12:50:16.892388

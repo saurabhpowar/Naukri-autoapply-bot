@@ -19,13 +19,14 @@
 - ✅ Uses **Microsoft Edge** browser
 - ✅ Uses `webdriver-manager` for automatic driver download (no manual setup!)
 
-## 🚀 How Current-Page Applications Work
+## 🚀 How Search and Applications Work
 
 1. The bot logs in and waits while you use the **current Edge tab** to search for jobs and apply Naukri's filters manually.
-2. After the filtered results page is ready, press Enter in the console. The bot collects unique job links from that page only.
-3. Review the current page URL and queued job count. Type `y` to apply to those jobs, or `n` to stop.
+2. After the filtered starting page is ready, press Enter in the console. The bot collects unique job links and asks you to confirm before applying.
+3. After processing that page, the bot clicks Naukri's **Next** control to continue forward through the same filtered results. It does not rebuild the search URL or navigate back to earlier pages.
+4. It stops when there is no enabled next page, a page repeats, the daily quota/request limit is reached, or `MAX_APPLICATIONS` successful applications are recorded.
 
-The bot does not rebuild the search URL, reset filters, or move to any previous or next page. To use a different results page, run the bot again and select that page manually before pressing Enter.
+To start from a different filtered page, select it manually in Edge before pressing Enter. The bot only moves forward from that starting point.
 
 ## 🚀 Quick Start
 
